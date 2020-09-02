@@ -1,0 +1,12 @@
+{
+    "C_Cpp.default.includePath": [
+        "/usr/local/include/**",
+    ],
+    "C_Cpp.default.macFrameworkPath": [
+        "/System/Library/FrameWorks",
+        "/Library/Frameworks",
+    ],
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.intelliSenseMode": "gcc-x64",
+}
