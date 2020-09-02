@@ -1,5 +1,7 @@
 
 # build files
 build
+include
+lib
 
 Resources/*

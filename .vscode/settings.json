@@ -1,6 +1,6 @@
 {
     "C_Cpp.default.includePath": [
-        "/usr/local/include/**",
+        "./include/**",
     ],
     "C_Cpp.default.macFrameworkPath": [
         "/System/Library/FrameWorks",

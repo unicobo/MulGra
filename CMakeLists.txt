@@ -21,26 +21,24 @@ endif()
 #set(CMAKE_BUILD_TYPE Release)
 
 include_directories(
-    "/usr/local/include/siv3d/"
-    "/usr/local/include/siv3d/ThirdParty/"
+    "./include/"
+    "./include/ThirdParty/"
 )
 
 link_directories(
-    "/usr/lib/"
-    "/usr/local/lib/"
-    "/usr/local/lib/siv3d/"
-    "/usr/local/lib/siv3d/glew/"
-    "/usr/local/lib/siv3d/opencv/"
-    "/usr/local/lib/siv3d/libjpeg-turbo/"
-    "/usr/local/lib/siv3d/libogg/"
-    "/usr/local/lib/siv3d/boost/"
-    "/usr/local/lib/siv3d/libwebp/"
-    "/usr/local/lib/siv3d/harfbuzz/"
-    "/usr/local/lib/siv3d/libvorbis/"
-    "/usr/local/lib/siv3d/zlib/"
-    "/usr/local/lib/siv3d/freetype/"
-    "/usr/local/lib/siv3d/libgif/"
-    "/usr/local/lib/siv3d/libpng/"
+    "./lib/macOS/"
+    "./lib/macOS/glew/"
+    "./lib/macOS/opencv/"
+    "./lib/macOS/libjpeg-turbo/"
+    "./lib/macOS/libogg/"
+    "./lib/macOS/boost/"
+    "./lib/macOS/libwebp/"
+    "./lib/macOS/harfbuzz/"
+    "./lib/macOS/libvorbis/"
+    "./lib/macOS/zlib/"
+    "./lib/macOS/freetype/"
+    "./lib/macOS/libgif/"
+    "./lib/macOS/libpng/"
 )
 
 set(SOURCE_FILES
@@ -83,9 +81,6 @@ target_link_libraries(${MY_PROJECT_NAME}
 	-ldl
 	-lfreetype
 	-lharfbuzz
-	-lglib-2.0
-	-lgobject-2.0
-	-lgio-2.0
 	-lpng
 	-lturbojpeg
 	-lgif
@@ -95,10 +90,6 @@ target_link_libraries(${MY_PROJECT_NAME}
 	-lvorbisenc
 	-lvorbisfile
 	-lboost_filesystem
-	-lavformat
-	-lavcodec
-	-lavutil
-	-lswresample
     -lz
     -lutil
 )
