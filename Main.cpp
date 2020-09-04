@@ -1,43 +1,128 @@
 #include <Siv3D.hpp>
 
+const String team_name = U"unicobo";
+
+enum Scenes
+{
+    STitle,
+    SMenu,
+    SGame,
+};
+
+struct GameData
+{
+    int32 score = 0;
+    int32 n_stage = 0;
+};
+
+using App = SceneManager<Scenes, GameData>;
+
+// タイトルシーン
+class Title : public App::Scene
+{
+public:
+    Title(const InitData &init)
+        : IScene(init)
+    {
+    }
+
+    void update() override
+    {
+        if (MouseL.down())
+        {
+            changeScene(SMenu, 0.1);
+        }
+    }
+
+    void draw() const override
+    {
+        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+
+        FontAsset(U"TitleFont")(U"MulGra").drawAt(400, 100);
+
+        FontAsset(U"ScoreFont")(U"Made by: {}"_fmt(team_name)).draw(520, 540);
+
+        Circle(Cursor::Pos(), 50).draw(Palette::Orange);
+    }
+};
+
+class Menu : public App::Scene
+{
+public:
+    Menu(const InitData &init)
+        : IScene(init)
+    {
+    }
+
+    void update() override
+    {
+        if (MouseL.down())
+        {
+            changeScene(SGame);
+        }
+    }
+
+    void draw() const override
+    {
+        FontAsset(U"TitleFont")(U"MulGra").drawAt(400, 100);
+    }
+
+};
+
+class Game : public App::Scene
+{
+private:
+    Texture m_texture;
+
+public:
+    Game(const InitData &init)
+        : IScene(init), m_texture(Emoji(U"🐈"))
+    {
+    }
+
+    void update() override
+    {
+        // 左クリックで
+        if (MouseL.down())
+        {
+            // タイトルシーンに遷移
+            changeScene(STitle);
+        }
+
+        // マウスカーソルの移動でスコアが増加
+        getData().score += static_cast<int32>(Cursor::Delta().length() * 10);
+    }
+
+    void draw() const override
+    {
+        Scene::SetBackground(ColorF(0.2, 0.8, 0.6));
+
+        m_texture.drawAt(Cursor::Pos());
+
+        // 現在のスコアを表示
+        FontAsset(U"ScoreFont")(U"Score: {}"_fmt(getData().score)).draw(40, 40);
+    }
+};
 
 void Main()
 {
-    // 背景を水色にする
-    Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
+    FontAsset::Register(U"TitleFont", 60, Typeface::Heavy);
+    FontAsset::Register(U"ScoreFont", 30, Typeface::Bold);
 
-    // 大きさ 60 のフォントを用意
-    const Font font(60);
+    // シーンマネージャーを作成
+    // ここで GameData も初期化される
+    App manager;
 
-    // 猫のテクスチャを用意
-    const Texture cat(Emoji(U"🐈"));
-
-    // 猫の座標
-    Vec2 catPos(640, 450);
+    manager.add<Title>(STitle);
+    manager.add<Menu>(SMenu);
+    manager.add<Game>(SGame);
 
     while (System::Update())
     {
-        // テキストを画面の中心に描く
-        font(U"Hello, Siv3D!🐣").drawAt(Scene::Center(), Palette::Black);
-
-        // 大きさをアニメーションさせて猫を表示する
-        cat.resized(100 + Periodic::Sine0_1(1s) * 20).drawAt(catPos);
-
-        // マウスカーソルに追従する半透明の赤い円を描く
-        Circle(Cursor::Pos(), 40).draw(ColorF(1, 0, 0, 0.5));
-
-        // [A] キーが押されたら
-        if (KeyA.down())
+        // 現在のシーンを実行
+        if (!manager.update())
         {
-            // Hello とデバッグ表示する
-            Print << U"Hello!";
-        }
-
-        // ボタンが押されたら
-        if (SimpleGUI::Button(U"Move the cat", Vec2(600, 20)))
-        {
-            // 猫の座標を画面内のランダムな位置に移動する
-            catPos = RandomVec2(Scene::Rect());
+            break;
         }
     }
 }
