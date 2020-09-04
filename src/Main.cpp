@@ -53,7 +53,7 @@ private:
 
 public:
     Menu(const InitData &init)
-        : IScene(init)
+        : IScene(init), game_select(false)
     {
     }
 
