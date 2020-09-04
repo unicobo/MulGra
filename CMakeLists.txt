@@ -42,7 +42,7 @@ link_directories(
 )
 
 set(SOURCE_FILES
-	"./Main.cpp"
+	"./src/Main.cpp"
 )
 
 set(APP_PROJECT_NAME ${MY_PROJECT_NAME})
