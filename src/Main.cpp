@@ -48,6 +48,9 @@ public:
 
 class Menu : public App::Scene
 {
+private:
+    bool game_select;
+
 public:
     Menu(const InitData &init)
         : IScene(init)
@@ -56,9 +59,23 @@ public:
 
     void update() override
     {
-        if (MouseL.down())
+        const Point center = Scene::Center();
+
+        if (game_select)
         {
-            changeScene(SGame);
+
+        }
+        else
+        {
+            if (SimpleGUI::ButtonAt(U"Stage Select", Vec2(center.x, center.y - 50)))
+            {
+                game_select = true;
+            }
+
+            if (SimpleGUI::ButtonAt(U"Back To Title", Vec2(center.x, center.y + 50)))
+            {
+                changeScene(STitle);
+            }
         }
     }
 
@@ -66,7 +83,6 @@ public:
     {
         FontAsset(U"TitleFont")(U"MulGra").drawAt(400, 100);
     }
-
 };
 
 class Game : public App::Scene
