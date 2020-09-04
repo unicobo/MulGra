@@ -21,25 +21,28 @@ endif()
 #set(CMAKE_BUILD_TYPE Release)
 
 include_directories(
+    "/usr/include"
     "./include/"
     "./include/ThirdParty/"
 )
 
-link_directories(
-    "./lib/macOS/"
-    "./lib/macOS/glew/"
-    "./lib/macOS/opencv/"
-    "./lib/macOS/libjpeg-turbo/"
-    "./lib/macOS/libogg/"
-    "./lib/macOS/boost/"
-    "./lib/macOS/libwebp/"
-    "./lib/macOS/harfbuzz/"
-    "./lib/macOS/libvorbis/"
-    "./lib/macOS/zlib/"
-    "./lib/macOS/freetype/"
-    "./lib/macOS/libgif/"
-    "./lib/macOS/libpng/"
-)
+if(APPLE)
+    link_directories(
+        "./lib/macOS/"
+        "./lib/macOS/glew/"
+        "./lib/macOS/opencv/"
+        "./lib/macOS/libjpeg-turbo/"
+        "./lib/macOS/libogg/"
+        "./lib/macOS/boost/"
+        "./lib/macOS/libwebp/"
+        "./lib/macOS/harfbuzz/"
+        "./lib/macOS/libvorbis/"
+        "./lib/macOS/zlib/"
+        "./lib/macOS/freetype/"
+        "./lib/macOS/libgif/"
+        "./lib/macOS/libpng/"
+    )
+endif()
 
 set(SOURCE_FILES
 	"./Main.cpp"
@@ -61,35 +64,68 @@ set_target_properties(${MY_PROJECT_NAME} PROPERTIES
   MACOSX_BUNDLE TRUE
 )
 
-target_link_libraries(${MY_PROJECT_NAME}
-    -lSiv3D
-    "-framework CoreMedia"
-    "-framework CoreAudio"
-    "-framework AVFoundation"
-    "-framework Foundation"
-    "-framework AudioToolbox"
-    "-framework OpenGL"
-    "-framework OpenAL"
-    -lopencv_imgcodecs
-    -lopencv_photo
-    -lopencv_videoio
-    -lopencv_objdetect
-    -lopencv_core
-    -lopencv_imgproc
-    -lGLEW
-	-lpthread
-	-ldl
-	-lfreetype
-	-lharfbuzz
-	-lpng
-	-lturbojpeg
-	-lgif
-    -lwebp
-	-logg
-	-lvorbis
-	-lvorbisenc
-	-lvorbisfile
-	-lboost_filesystem
-    -lz
-    -lutil
-)
+if(APPLE)
+    target_link_libraries(${MY_PROJECT_NAME}
+        -lSiv3D
+        "-framework CoreMedia"
+        "-framework CoreAudio"
+        "-framework AVFoundation"
+        "-framework Foundation"
+        "-framework AudioToolbox"
+        "-framework OpenGL"
+        "-framework OpenAL"
+        -lopencv_imgcodecs
+        -lopencv_photo
+        -lopencv_videoio
+        -lopencv_objdetect
+        -lopencv_core
+        -lopencv_imgproc
+        -lGLEW
+        -lpthread
+        -ldl
+        -lfreetype
+        -lharfbuzz
+        -lpng
+        -lturbojpeg
+        -lgif
+        -lwebp
+        -logg
+        -lvorbis
+        -lvorbisenc
+        -lvorbisfile
+        -lboost_filesystem
+        -lz
+        -lutil
+    )
+else()
+    target_link_libraries(${MY_PROJECT_NAME}
+        ${PROJECT_SOURCE_DIR}/lib/libSiv3D.a
+        ${OPENCV4_LIBRARIES}
+        -lOpenGL
+        -lGLEW
+        -lX11
+        -lpthread
+        -ldl
+        -ludev
+        -lfreetype
+        -lharfbuzz
+        -lglib-2.0
+        -lgobject-2.0
+        -lgio-2.0
+        -lpng
+        -lturbojpeg
+        -lgif
+        -lwebp
+        -lopenal
+        -logg
+        -lvorbis
+        -lvorbisenc
+        -lvorbisfile
+        -lboost_filesystem
+        -lavformat
+        -lavcodec
+        -lavutil
+        -lswresample
+        -lz
+    )
+endif()
