@@ -69,6 +69,36 @@ public:
 
 };
 
+using Stage = Grid<int>;
+
+Stage loadStage(String filename)
+{
+    TextReader reader(filename);
+
+    if (!reader)
+    {
+        throw Error(U"Failed to open `{}`"_fmt(filename));
+    }
+
+    String line;
+
+    reader.readLine(line);
+    int col = Parse<int>(line);
+    reader.readLine(line);
+    int row = Parse<int>(line);
+    Stage result(col, row);
+
+    for(int i = 0; i < row; i++)
+    {
+        for(int j = 0; j < col; j++)
+        {
+            reader.readLine(line);
+            result[i][j] = Parse<int>(line);
+        }
+    }
+    return result;
+}
+
 class Game : public App::Scene
 {
 private:
