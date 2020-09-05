@@ -1,4 +1,5 @@
 #include <Siv3D.hpp>
+#include "ControlButton.hpp"
 
 const String team_name = U"unicobo";
 
@@ -72,35 +73,22 @@ public:
 class Game : public App::Scene
 {
 private:
-    Texture m_texture;
-
+    ControlButton button;
 public:
     Game(const InitData &init)
-        : IScene(init), m_texture(Emoji(U"🐈"))
+        : IScene(init), button(400, 400, 100, 0)
     {
     }
 
     void update() override
     {
-        // 左クリックで
-        if (MouseL.down())
-        {
-            // タイトルシーンに遷移
-            changeScene(STitle);
-        }
-
-        // マウスカーソルの移動でスコアが増加
-        getData().score += static_cast<int32>(Cursor::Delta().length() * 10);
     }
 
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.2, 0.8, 0.6));
-
-        m_texture.drawAt(Cursor::Pos());
-
-        // 現在のスコアを表示
-        FontAsset(U"ScoreFont")(U"Score: {}"_fmt(getData().score)).draw(40, 40);
+        button.draw();
+        if(button.clicked())
+            Print << U"CLICKED";
     }
 };
 
