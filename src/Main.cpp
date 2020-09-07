@@ -48,17 +48,46 @@ public:
 
 class Menu : public App::Scene
 {
+private:
+    bool game_select;
+
 public:
     Menu(const InitData &init)
-        : IScene(init)
+        : IScene(init), game_select(false)
     {
     }
 
     void update() override
     {
-        if (MouseL.down())
+        const Point center = Scene::Center();
+
+        if (game_select)
         {
-            changeScene(SGame);
+            double height = Scene::Height()/4;
+            double width = Scene::Width()/4;
+            for (int i = 1; i < 4; i++)
+            {
+                for (int j = 1; j < 4; j++)
+                {
+                    if(SimpleGUI::ButtonAt(U"{}"_fmt((i-1)*3 + j), Vec2(width*j, height*i + 50)))
+                    {
+                        getData().n_stage = (i-1)*3 + j;
+                        changeScene(SGame);
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (SimpleGUI::ButtonAt(U"Stage Select", Vec2(center.x, center.y - 50)))
+            {
+                game_select = true;
+            }
+
+            if (SimpleGUI::ButtonAt(U"Back To Title", Vec2(center.x, center.y + 50)))
+            {
+                changeScene(STitle);
+            }
         }
     }
 
@@ -66,7 +95,6 @@ public:
     {
         FontAsset(U"TitleFont")(U"MulGra").drawAt(400, 100);
     }
-
 };
 
 using Stage = Grid<int>;
@@ -131,6 +159,7 @@ public:
 
         // 現在のスコアを表示
         FontAsset(U"ScoreFont")(U"Score: {}"_fmt(getData().score)).draw(40, 40);
+        FontAsset(U"ScoreFont")(U"Stage: {}"_fmt(getData().n_stage)).draw(40, 60);
     }
 };
 
