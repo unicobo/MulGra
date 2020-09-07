@@ -76,7 +76,7 @@ private:
     ControlButton button;
 public:
     Game(const InitData &init)
-        : IScene(init), button(400, 400, 100, 0)
+        : IScene(init), button(400, 400, 100)
     {
     }
 
