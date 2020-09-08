@@ -26,6 +26,17 @@ include_directories(
     "./include/ThirdParty/"
 )
 
+set(SOURCE_FILES
+	"./Main.cpp"
+)
+
+set(APP_PROJECT_NAME ${MY_PROJECT_NAME})
+set(EXECUTABLE_NAME ${MY_PROJECT_NAME})
+
+file(GLOB_RECURSE RESOURCE_FILES CONFIGURE_DEPENDS RELATIVE "${PROJECT_SOURCE_DIR}" "Resources/*")
+
+add_executable(${MY_PROJECT_NAME} ${SOURCE_FILES} ${RESOURCE_FILES})
+
 if(APPLE)
     link_directories(
         "./lib/macOS/"
@@ -42,29 +53,14 @@ if(APPLE)
         "./lib/macOS/libgif/"
         "./lib/macOS/libpng/"
     )
-endif()
-
-set(SOURCE_FILES
-	"./Main.cpp"
-)
-
-set(APP_PROJECT_NAME ${MY_PROJECT_NAME})
-set(EXECUTABLE_NAME ${MY_PROJECT_NAME})
-
-file(GLOB_RECURSE RESOURCE_FILES CONFIGURE_DEPENDS RELATIVE "${PROJECT_SOURCE_DIR}" "Resources/*")
-
-add_executable(${MY_PROJECT_NAME} ${SOURCE_FILES} ${RESOURCE_FILES})
-
-foreach(RESOURCE_FILE ${RESOURCE_FILES})
+    foreach(RESOURCE_FILE ${RESOURCE_FILES})
     get_filename_component(RESOURCE_DIR ${RESOURCE_FILE} DIRECTORY)
     set_source_files_properties(${RESOURCE_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "${RESOURCE_DIR}")
-endforeach(RESOURCE_FILE)
+    endforeach(RESOURCE_FILE)
 
-set_target_properties(${MY_PROJECT_NAME} PROPERTIES
-  MACOSX_BUNDLE TRUE
-)
-
-if(APPLE)
+    set_target_properties(${MY_PROJECT_NAME} PROPERTIES
+    MACOSX_BUNDLE TRUE
+    )
     target_link_libraries(${MY_PROJECT_NAME}
         -lSiv3D
         "-framework CoreMedia"
@@ -97,7 +93,8 @@ if(APPLE)
         -lz
         -lutil
     )
-else()
+elseif(UNIX)
+    pkg_check_modules(OPENCV4 REQUIRED opencv4)
     target_link_libraries(${MY_PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/lib/libSiv3D.a
         ${OPENCV4_LIBRARIES}
