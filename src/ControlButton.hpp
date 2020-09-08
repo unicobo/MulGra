@@ -50,4 +50,9 @@ public:
     {
         return rect.leftClicked();
     }
+
+    bool released() const
+    {
+        return rect.leftReleased();
+    }
 };

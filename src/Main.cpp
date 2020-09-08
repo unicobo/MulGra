@@ -87,8 +87,8 @@ public:
     void draw() const override
     {
         button.draw();
-        if(button.clicked())
-            Print << U"CLICKED";
+        if(button.released())
+            Print << U"RELEASED!";
     }
 };
 
