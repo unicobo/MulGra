@@ -144,19 +144,9 @@ public:
 
     void draw() const override
     {
-<<<<<<< HEAD
         button.draw();
         if(button.released())
             Print << U"RELEASED!";
-=======
-        Scene::SetBackground(ColorF(0.2, 0.8, 0.6));
-
-        m_texture.drawAt(Cursor::Pos());
-
-        // 現在のスコアを表示
-        FontAsset(U"ScoreFont")(U"Score: {}"_fmt(getData().score)).draw(40, 40);
-        FontAsset(U"ScoreFont")(U"Stage: {}"_fmt(getData().n_stage)).draw(40, 60);
->>>>>>> develop
     }
 };
 
