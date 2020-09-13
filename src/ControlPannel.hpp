@@ -43,9 +43,15 @@ public:
             }
         };
 
-    Vec2 get_operation()
+    Operation get_operation() const
     {
-
+        for(int i = 0; i < BUTTON_NUM; i++)
+        {
+            Operation ope = control_buttons[i].get_operation();
+            if(ope.is_valid_operation())
+                return ope;
+        }
+        return Operation();
     }
 
     void draw() const

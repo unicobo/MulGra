@@ -68,4 +68,11 @@ public:
     {
         return rect.leftReleased();
     }
+
+    Operation get_operation() const
+    {
+        if(released())
+            return Operation(color, direction);
+        return Operation();
+    }
 };
