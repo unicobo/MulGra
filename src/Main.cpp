@@ -149,7 +149,7 @@ public:
         //     Print << U"RELEASED!";
 
         pannel.draw();
-        if(pannel.get_operation().is_valid_operation()) Print << pannel.get_operation().to_string();
+        if(pannel.get_operation()) Print << pannel.get_operation().value().to_string();
     }
 };
 

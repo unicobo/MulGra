@@ -20,11 +20,10 @@ private:
     const double BUTTON_SIZE_PROPOTION = 0.2;
 
     // button direction
-    const double BUTTON_DIRECTIONS[BUTTON_NUM] = {Direction::UP, Direction::DOWN, Direction::RIGHT, Direction::LEFT, Direction::DOWN, Direction::UP, Direction::LEFT, Direction::RIGHT}; 
+    const Direction BUTTON_DIRECTIONS[BUTTON_NUM] = {Direction::UP, Direction::DOWN, Direction::RIGHT, Direction::LEFT, Direction::DOWN, Direction::UP, Direction::LEFT, Direction::RIGHT}; 
 
     // color
     const Color PANNEL_COLOR = Palette::White;
-    const Color BUTTON_COLOR[BUTTON_NUM / 2] = {Palette::Red, Palette::Blue, Palette::Green, Palette::Orange};
 
     // hoge
     const double dx[BUTTON_NUM] = {BUTTON_DIST_PROPOTION, BUTTON_DIST_PROPOTION, BUTTON_MARGN_PROPOTION / 2, -BUTTON_MARGN_PROPOTION / 2, -BUTTON_DIST_PROPOTION, -BUTTON_DIST_PROPOTION, -BUTTON_MARGN_PROPOTION / 2, BUTTON_MARGN_PROPOTION / 2};
@@ -38,20 +37,20 @@ public:
             {
                 control_buttons[i].set_pos(Vec2(_x + _len * dx[i], _y + _len * dy[i]));
                 control_buttons[i].set_len(_len * BUTTON_SIZE_PROPOTION);
-                control_buttons[i].set_color(BUTTON_COLOR[i / 2]);
+                control_buttons[i].set_player((Player)(i / 2));
                 control_buttons[i].set_direction(BUTTON_DIRECTIONS[i]);
             }
         };
 
-    Operation get_operation() const
+    std::optional<Operation> get_operation() const
     {
         for(int i = 0; i < BUTTON_NUM; i++)
         {
-            Operation ope = control_buttons[i].get_operation();
-            if(ope.is_valid_operation())
-                return ope;
+            auto op = control_buttons[i].get_operation();
+            if(op)
+                return op;
         }
-        return Operation();
+        return std::nullopt;
     }
 
     void draw() const

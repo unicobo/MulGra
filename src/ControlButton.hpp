@@ -7,8 +7,8 @@ class ControlButton
 private:
     Vec2 pos;
     double len;
-    Color color;
-    int direction; // 0:right 1:down 2:left 3:up 
+    Player player;
+    Direction direction; // 0:right 1:down 2:left 3:up 
     Rect rect;
 
     // button size
@@ -32,16 +32,17 @@ private:
 
 public:
     ControlButton()
-        : pos(0, 0), len(0), color(Palette::White), direction(0), rect(0, 0, 0, 0){};
+        : pos(0, 0), len(0), player(Player::RED), direction(Direction::RIGHT), rect(0, 0, 0, 0){};
 
-    ControlButton(double _x, double _y, double _len, Color _color = Palette::Red, int _direction = 0)
-        : pos(_x, _y), len(_len), color(_color), direction(_direction % 4), rect(_x - _len / 2, _y - _len / 2, _len, _len){};
+    ControlButton(double _x, double _y, double _len, Player _player = Player::RED, Direction _direction = Direction::RIGHT)
+        : pos(_x, _y), len(_len), player(_player), direction(_direction), rect(_x - _len / 2, _y - _len / 2, _len, _len){};
 
     void draw() const
     {
         rect.rounded(len * ROUND_PROPORTION).draw(BASE_COLOR);
 
-        Color current_color = rect.leftPressed() ? Color(color.r, color.g, color.b, CLICKED_A) : color;
+        Color color = player2color(player);
+        Color current_color = rect.leftPressed() ? Color(color, CLICKED_A) : color;
 
         rect.rounded(len * ROUND_PROPORTION).drawFrame(len * FRAME_PROPORTION, 0, current_color);
 
@@ -54,9 +55,9 @@ public:
 
     void set_len(double _len) { len = _len; update_rect();}
 
-    void set_color(Color _color) { color = _color; }
+    void set_player(Player _player) { player = _player;}
 
-    void set_direction(int _direction) { direction = _direction; }
+    void set_direction(Direction _direction) { direction = _direction; }
 
     bool clicked() const
     {
@@ -69,10 +70,10 @@ public:
         return rect.leftReleased();
     }
 
-    Operation get_operation() const
+    std::optional<Operation> get_operation() const
     {
         if(released())
-            return Operation(color, direction);
-        return Operation();
+            return Operation(player, direction);
+        return std::nullopt;
     }
 };
