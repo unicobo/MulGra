@@ -20,10 +20,10 @@ private:
     const double BUTTON_SIZE_PROPOTION = 0.2;
 
     // button direction
-    const Direction BUTTON_DIRECTIONS[BUTTON_NUM] = {Direction::UP, Direction::DOWN, Direction::RIGHT, Direction::LEFT, Direction::DOWN, Direction::UP, Direction::LEFT, Direction::RIGHT}; 
+    const Direction BUTTON_DIRECTIONS[BUTTON_NUM] = {Direction::UP, Direction::DOWN, Direction::RIGHT, Direction::LEFT, Direction::DOWN, Direction::UP, Direction::LEFT, Direction::RIGHT};
 
     // color
-    const Color PANNEL_COLOR = Palette::White;
+    const Color PANNEL_COLOR = Color(0, 0, 0, 0);
 
     // hoge
     const double dx[BUTTON_NUM] = {BUTTON_DIST_PROPOTION, BUTTON_DIST_PROPOTION, BUTTON_MARGN_PROPOTION / 2, -BUTTON_MARGN_PROPOTION / 2, -BUTTON_DIST_PROPOTION, -BUTTON_DIST_PROPOTION, -BUTTON_MARGN_PROPOTION / 2, BUTTON_MARGN_PROPOTION / 2};
