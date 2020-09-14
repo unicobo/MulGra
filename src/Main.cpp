@@ -1,5 +1,5 @@
 #include <Siv3D.hpp>
-#include "ControlButton.hpp"
+#include "ControlPannel.hpp"
 
 const String team_name = U"unicobo";
 
@@ -131,10 +131,10 @@ Stage loadStage(String filename)
 class Game : public App::Scene
 {
 private:
-    ControlButton button;
+    ControlPannel pannel;
 public:
     Game(const InitData &init)
-        : IScene(init), button(400, 400, 100, Palette::Red, 0)
+        : IScene(init), pannel(400, 300, 400)
     {
     }
 
@@ -144,9 +144,12 @@ public:
 
     void draw() const override
     {
-        button.draw();
-        if(button.released())
-            Print << U"RELEASED!";
+        // button.draw();
+        // if(button.released())
+        //     Print << U"RELEASED!";
+
+        pannel.draw();
+        if(pannel.get_operation()) Print << pannel.get_operation().value().to_string();
     }
 };
 
