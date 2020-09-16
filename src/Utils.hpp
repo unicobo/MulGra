@@ -26,6 +26,12 @@ Color player2color(Player player)
     return _player2color[player];
 }
 
+Vec2 direction2vec2(Direction direction)
+{
+    static const Vec2 _direction2vec2[4] = {Vec2(1, 0), Vec2(0, 1), Vec2(-1, 0), Vec2(0, -1)};
+    return _direction2vec2[direction];
+}
+
 struct Operation
 {
     Player player;
