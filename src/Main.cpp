@@ -144,6 +144,8 @@ public:
     {
         if (auto op = pannel.get_operation())
             monster.move(op.value());
+        if(KeySpace.pressed())
+            monster.drop(2);
         monster.update();
     }
 

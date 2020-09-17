@@ -15,7 +15,11 @@ private:
 
     // movement
     const double SPEED_RATE = 2;
-    Stopwatch stopwatch = Stopwatch(1 / SPEED_RATE);
+    Stopwatch move_stopwatch = Stopwatch(Duration(1 / SPEED_RATE), true);
+
+    // drop
+    const double DROP_RATE = 1.5;
+    Stopwatch drop_stopwatch = Stopwatch(Duration(1 / DROP_RATE), true);
 
     // design
     const double ROUND_PROPORTION = 0.1;
@@ -41,16 +45,26 @@ public:
 
     void update()
     {
-        double t = Min(stopwatch.sF(), 1.0 / SPEED_RATE) * SPEED_RATE;
-        t = EaseInOutExpo(t);
-        set_pos(pre_pos.lerp(nxt_pos, t));
+        // Print << move_stopwatch.sF() << U" : " << drop_stopwatch.sF();
+        if(is_moving())
+        {
+            double t = Min(move_stopwatch.sF(), 1.0 / SPEED_RATE) * SPEED_RATE;
+            t = EaseInOutExpo(t);
+            set_pos(pre_pos.lerp(nxt_pos, t));
+        }
+        else if(is_dropping())
+        {
+            double t = Min(drop_stopwatch.sF(), 1.0 / DROP_RATE) * DROP_RATE;
+            t = EaseOutBounce(t);
+            set_pos(pre_pos.lerp(nxt_pos, t));
+        }
     }
 
     void move(Operation op)
     {
-        if(!is_moving() && op.player == player && (direction + 1) % 2 == op.direction % 2)
+        if(!is_moving() && !is_dropping() && op.player == player && (direction + 1) % 2 == op.direction % 2)
         {
-            stopwatch.restart();
+            move_stopwatch.restart();
             pre_pos = nxt_pos;
             nxt_pos = pre_pos + size * direction2vec2(op.direction);
         }
@@ -58,7 +72,22 @@ public:
 
     bool is_moving()
     {
-        return stopwatch.sF() <= 1 / SPEED_RATE;
+        return move_stopwatch.sF() <= 1 / SPEED_RATE;
+    }
+
+    void drop(int head)
+    {
+        if(!is_moving() && !is_dropping())
+        {
+            drop_stopwatch.restart();
+            pre_pos = nxt_pos;
+            nxt_pos = pre_pos + size * head * direction2vec2(direction);
+        }
+    }
+
+    bool is_dropping()
+    {
+        return drop_stopwatch.sF() <= 1 / DROP_RATE;
     }
 
     void draw() const
