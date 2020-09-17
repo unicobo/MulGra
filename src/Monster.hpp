@@ -46,23 +46,19 @@ public:
         set_pos(pre_pos.lerp(nxt_pos, t));
     }
 
-    void move(std::optional<Operation> optional)
+    void move(Operation op)
     {
-        if(optional)
+        if(!is_moving() && op.player == player && (direction + 1) % 2 == op.direction % 2)
         {
-            Operation operation = optional.value(); 
-            if(!is_moving() && operation.player == player && (direction + 1) % 2 == operation.direction % 2)
-            {
-                stopwatch.restart();
-                pre_pos = nxt_pos;
-                nxt_pos = pre_pos + size * direction2vec2(operation.direction);
-            }
+            stopwatch.restart();
+            pre_pos = nxt_pos;
+            nxt_pos = pre_pos + size * direction2vec2(op.direction);
         }
     }
 
     bool is_moving()
     {
-        return stopwatch.sF() <=1 / SPEED_RATE;
+        return stopwatch.sF() <= 1 / SPEED_RATE;
     }
 
     void draw() const

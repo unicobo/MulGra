@@ -142,7 +142,8 @@ public:
 
     void update() override
     {
-        monster.move(pannel.get_operation());
+        if (auto op = pannel.get_operation())
+            monster.move(op.value());
         monster.update();
     }
 
