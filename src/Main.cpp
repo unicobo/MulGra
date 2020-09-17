@@ -98,7 +98,18 @@ public:
     }
 };
 
-using Stage = Grid<int>;
+class Stage
+{
+    Grid<int> impl;
+
+public:
+    Stage(int col, int row): impl(Grid<int>(col, row)) {}
+
+    int* operator [](int n) { return impl[n]; }
+    
+    bool is_valid_operation();
+};
+
 
 Stage loadStage(String filename)
 {
