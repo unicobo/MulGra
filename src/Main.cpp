@@ -102,12 +102,29 @@ class Stage
 {
     Grid<int> impl;
 
+    const int col;
+    const int row;
+
 public:
-    Stage(int col, int row): impl(Grid<int>(col, row)) {}
+    Stage(int col, int row): impl(Grid<int>(col, row)), col(col), row(row) {}
 
     int* operator [](int n) { return impl[n]; }
-    
+
     bool is_valid_operation();
+
+    void draw()
+    {
+        static Font font(60);
+        double height = (double)Scene::Height()/row;
+        double width = (double)Scene::Width()/col;
+
+        for(int i = 0; i < col; i++)
+            for(int j = 0; j < row; j++)
+            {
+                // TODO:
+                font(U"%d"_fmt(impl[i][j])).drawAt(height*i, width * j, Palette::Black);
+            }
+    }
 };
 
 
