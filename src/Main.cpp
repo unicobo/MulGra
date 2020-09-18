@@ -1,5 +1,6 @@
 #include <Siv3D.hpp>
 #include "ControlPannel.hpp"
+#include "Monster.hpp"
 
 const String team_name = U"unicobo";
 
@@ -132,22 +133,25 @@ class Game : public App::Scene
 {
 private:
     ControlPannel pannel;
+    Monster monster;
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(400, 300, 400)
+        : IScene(init), pannel(400, 300, 400), monster(Vec2(100, 100), 100, Player::RED, Direction::RIGHT)
     {
     }
 
     void update() override
     {
+        if (auto op = pannel.get_operation())
+            monster.move(op.value());
+        if(KeySpace.pressed())
+            monster.drop(2);
+        monster.update();
     }
 
     void draw() const override
     {
-        // button.draw();
-        // if(button.released())
-        //     Print << U"RELEASED!";
-
+        monster.draw();
         pannel.draw();
         if(pannel.get_operation()) Print << pannel.get_operation().value().to_string();
     }
