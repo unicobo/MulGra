@@ -112,17 +112,26 @@ public:
 
     bool is_valid_operation();
 
-    void draw()
+    Vec2 get_pos(int i, int j)
+    {
+        double height = (double)Scene::Height()/row;
+        double width = (double)Scene::Width()/col;
+        double size = Min(height, width);
+        return Vec2(size * i, size * j);
+    }
+
+    void draw() const
     {
         static Font font(60);
         double height = (double)Scene::Height()/row;
         double width = (double)Scene::Width()/col;
+        double size = Min(height, width);
 
-        for(int i = 0; i < col; i++)
-            for(int j = 0; j < row; j++)
+        for(int i = 0; i < row; i++)
+            for(int j = 0; j < col; j++)
             {
-                // TODO:
-                font(U"%d"_fmt(impl[i][j])).drawAt(height*i, width * j, Palette::Black);
+                Rect(size * j, size * i, size, size).draw(Palette::White).drawFrame(size * 0.02, 0, Palette::Black);
+                font(U"{}"_fmt(impl[i][j])).drawAt(size * j + size / 2, size * i + size / 2, Palette::Black);
             }
     }
 };
@@ -147,12 +156,11 @@ Stage loadStage(String filename)
 
     for(int i = 0; i < row; i++)
     {
-        for(int j = 0; j < col; j++)
-        {
-            reader.readLine(line);
-            result[i][j] = Parse<int>(line);
-        }
+        reader.readLine(line);
+        Array<String> ids = line.split(' ');
+        for(int j = 0; j < col; j++)result[i][j] = Parse<int>(ids[j]);
     }
+
     return result;
 }
 
@@ -160,14 +168,20 @@ class Game : public App::Scene
 {
 private:
     ControlPannel pannel;
+    Stage stage;
+
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(400, 300, 400)
+        : IScene(init), pannel(600, 400, 100), stage(loadStage(U"../Resources/stages/stage01"))
     {
     }
 
     void update() override
     {
+        if(KeyT.pressed())
+        {
+            // test
+        }
     }
 
     void draw() const override
@@ -175,6 +189,8 @@ public:
         // button.draw();
         // if(button.released())
         //     Print << U"RELEASED!";
+
+        stage.draw();
 
         pannel.draw();
         if(pannel.get_operation()) Print << pannel.get_operation().value().to_string();
