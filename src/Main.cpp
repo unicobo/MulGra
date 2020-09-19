@@ -1,5 +1,6 @@
 #include <Siv3D.hpp>
 #include "ControlPannel.hpp"
+#include "Monster.hpp"
 
 const String team_name = U"unicobo";
 
@@ -183,7 +184,6 @@ public:
         //     Print << U"RELEASED!";
 
         stage.draw();
-
         pannel.draw();
         if(pannel.get_operation()) Print << pannel.get_operation().value().to_string();
     }
