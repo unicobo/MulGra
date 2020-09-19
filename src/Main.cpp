@@ -112,14 +112,6 @@ public:
 
     bool is_valid_operation();
 
-    Vec2 get_pos(int i, int j)
-    {
-        double height = (double)Scene::Height()/row;
-        double width = (double)Scene::Width()/col;
-        double size = Min(height, width);
-        return Vec2(size * i, size * j);
-    }
-
     void draw() const
     {
         static Font font(60);
