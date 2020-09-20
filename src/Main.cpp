@@ -1,6 +1,7 @@
 #include <Siv3D.hpp>
 #include "ControlPannel.hpp"
 #include "Monster.hpp"
+#include "GameObject.hpp"
 
 const String team_name = U"unicobo";
 
@@ -102,12 +103,26 @@ public:
 class Stage
 {
     Grid<int> impl;
+    Grid<GameObject> obj;
 
+    const Vec2 BASE_POS;
+    const Vec2 STAGE_SIZE;
     const int col;
     const int row;
+    const double grid_size;
 
 public:
-    Stage(int col, int row): impl(Grid<int>(col, row)), col(col), row(row) {}
+    Stage(Vec2 base_pos, Vec2 stage_size, int col, int row)
+        : BASE_POS(base_pos)
+        , STAGE_SIZE(stage_size)
+        , impl(Grid<int>(col, row))
+        , obj(Grid<GameObject>(col, row))
+        , col(col)
+        , row(row)
+        , grid_size(Min(stage_size.y/row, stage_size.x/col))
+        {
+            for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)obj[i][j] = GameObject(BASE_POS, Vector2D(j, i), grid_size);
+        }
 
     int* operator [](int n) { return impl[n]; }
 
@@ -115,17 +130,20 @@ public:
 
     void draw() const
     {
-        static Font font(60);
-        double height = (double)Scene::Height()/row;
-        double width = (double)Scene::Width()/col;
-        double size = Min(height, width);
+        // static Font font(60);
+        // double height = (double)Scene::Height()/row;
+        // double width = (double)Scene::Width()/col;
+        // double size = Min(height, width);
 
-        for(int i = 0; i < row; i++)
-            for(int j = 0; j < col; j++)
-            {
-                Rect(size * j, size * i, size, size).draw(Palette::White).drawFrame(size * 0.02, 0, Palette::Black);
-                font(U"{}"_fmt(impl[i][j])).drawAt(size * j + size / 2, size * i + size / 2, Palette::Black);
-            }
+        // for(int i = 0; i < row; i++)
+        //     for(int j = 0; j < col; j++)
+        //     {
+        //         Rect(size * j, size * i, size, size).draw(Palette::White).drawFrame(size * 0.02, 0, Palette::Black);
+        //         font(U"{}"_fmt(impl[i][j])).drawAt(size * j + size / 2, size * i + size / 2, Palette::Black);
+        //     }
+
+        for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
+            obj[i][j].draw();
     }
 };
 
@@ -145,7 +163,7 @@ Stage loadStage(String filename)
     int col = Parse<int>(line);
     reader.readLine(line);
     int row = Parse<int>(line);
-    Stage result(col, row);
+    Stage result(Vec2(0,0), Vec2(400, 500), col, row);
 
     for(int i = 0; i < row; i++)
     {
