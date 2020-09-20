@@ -113,10 +113,10 @@ class Stage
 
 public:
     Stage(Vec2 base_pos, Vec2 stage_size, int col, int row)
-        : BASE_POS(base_pos)
-        , STAGE_SIZE(stage_size)
-        , impl(Grid<int>(col, row))
+        : impl(Grid<int>(col, row))
         , obj(Grid<GameObject>(col, row))
+        , BASE_POS(base_pos)
+        , STAGE_SIZE(stage_size)
         , col(col)
         , row(row)
         , grid_size(Min(stage_size.y/row, stage_size.x/col))
@@ -163,7 +163,7 @@ Stage loadStage(String filename)
     int col = Parse<int>(line);
     reader.readLine(line);
     int row = Parse<int>(line);
-    Stage result(Vec2(0,0), Vec2(400, 500), col, row);
+    Stage result(Vec2(20,20), Vec2(400, 500), col, row);
 
     for(int i = 0; i < row; i++)
     {
