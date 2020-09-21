@@ -116,13 +116,12 @@ class Stage
         switch (id)
         {
         case GameObjectId::EMPTY:
-            // return Empty(BASE_POS, pos_in_grid, grid_size);
-            Print << id;
             return new Empty(BASE_POS, pos_in_grid, grid_size);
             break;
-        
+        case GameObjectId::BLOCK:
+            return new Block(BASE_POS, pos_in_grid, grid_size);
+            break;
         default:
-            Print << id;
             return new GameObject(BASE_POS, pos_in_grid, grid_size);
             break;
         }
@@ -139,10 +138,7 @@ public:
         , grid_size(Min(stage_size.y/row, stage_size.x/col))
         {
             for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
-            {
                 obj[i][j] = make_object((GameObjectId)impl[i][j], Vector2D<int>(j, i));
-            }
-            for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)Print << obj[i][j]->get_id();
         }
 
     int* operator [](int n) { return impl[n]; }
