@@ -103,7 +103,7 @@ public:
 class Stage
 {
     Grid<int> impl;
-    Grid<GameObject> obj;
+    Grid<GameObject*> obj;
 
     const Vec2 BASE_POS;
     const Vec2 STAGE_SIZE;
@@ -111,17 +111,38 @@ class Stage
     const int row;
     const double grid_size;
 
+    GameObject* make_object(GameObjectId id, Vector2D<int> pos_in_grid)
+    {
+        switch (id)
+        {
+        case GameObjectId::EMPTY:
+            // return Empty(BASE_POS, pos_in_grid, grid_size);
+            Print << id;
+            return new Empty(BASE_POS, pos_in_grid, grid_size);
+            break;
+        
+        default:
+            Print << id;
+            return new GameObject(BASE_POS, pos_in_grid, grid_size);
+            break;
+        }
+    }
+
 public:
-    Stage(Vec2 base_pos, Vec2 stage_size, int col, int row)
-        : impl(Grid<int>(col, row))
-        , obj(Grid<GameObject>(col, row))
+    Stage(Vec2 base_pos, Vec2 stage_size, Grid<int> _impl)
+        : impl(_impl)
+        , obj(Grid<GameObject*>(_impl.width(), _impl.height()))
         , BASE_POS(base_pos)
         , STAGE_SIZE(stage_size)
-        , col(col)
-        , row(row)
+        , col(_impl.width())
+        , row(_impl.height())
         , grid_size(Min(stage_size.y/row, stage_size.x/col))
         {
-            for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)obj[i][j] = GameObject(BASE_POS, Vector2D(j, i), grid_size);
+            for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
+            {
+                obj[i][j] = make_object((GameObjectId)impl[i][j], Vector2D<int>(j, i));
+            }
+            for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)Print << obj[i][j]->get_id();
         }
 
     int* operator [](int n) { return impl[n]; }
@@ -130,20 +151,8 @@ public:
 
     void draw() const
     {
-        // static Font font(60);
-        // double height = (double)Scene::Height()/row;
-        // double width = (double)Scene::Width()/col;
-        // double size = Min(height, width);
-
-        // for(int i = 0; i < row; i++)
-        //     for(int j = 0; j < col; j++)
-        //     {
-        //         Rect(size * j, size * i, size, size).draw(Palette::White).drawFrame(size * 0.02, 0, Palette::Black);
-        //         font(U"{}"_fmt(impl[i][j])).drawAt(size * j + size / 2, size * i + size / 2, Palette::Black);
-        //     }
-
         for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
-            obj[i][j].draw();
+            obj[i][j]->draw();
     }
 };
 
@@ -163,16 +172,17 @@ Stage loadStage(String filename)
     int col = Parse<int>(line);
     reader.readLine(line);
     int row = Parse<int>(line);
-    Stage result(Vec2(20,20), Vec2(400, 500), col, row);
+    // Stage result(Vec2(20,20), Vec2(400, 500), col, row);
 
+    Grid<int> impl(col, row);
     for(int i = 0; i < row; i++)
     {
         reader.readLine(line);
         Array<String> ids = line.split(' ');
-        for(int j = 0; j < col; j++)result[i][j] = Parse<int>(ids[j]);
+        for(int j = 0; j < col; j++)impl[i][j] = Parse<int>(ids[j]);
     }
 
-    return result;
+    return Stage(Vec2(20, 20), Vec2(400, 500), impl);
 }
 
 class Game : public App::Scene
