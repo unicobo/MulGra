@@ -1,6 +1,6 @@
 #include <Siv3D.hpp>
 #include "ControlPannel.hpp"
-#include "Monster.hpp"
+// #include "Monster.hpp"
 #include "GameObject.hpp"
 
 const String team_name = U"unicobo";
@@ -110,6 +110,7 @@ class Stage
     const int col;
     const int row;
     const double grid_size;
+    Array<Monster*> player_array[4];
 
     GameObject* make_object(GameObjectId id, Vector2D<int> pos_in_grid)
     {
@@ -120,6 +121,18 @@ class Stage
             break;
         case GameObjectId::BLOCK:
             return new Block(BASE_POS, pos_in_grid, grid_size);
+            break;
+        case GameObjectId::RIGHT_MONSTER:
+            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
+            break;
+        case GameObjectId::DOWN_MONSTER:
+            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
+            break;
+        case GameObjectId::LEFT_MONSTER:
+            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
+            break;
+        case GameObjectId::UP_MONSTER:
+            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
             break;
         default:
             return new GameObject(BASE_POS, pos_in_grid, grid_size);
@@ -138,12 +151,23 @@ public:
         , grid_size(Min(stage_size.y/row, stage_size.x/col))
         {
             for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
+            {
                 obj[i][j] = make_object((GameObjectId)impl[i][j], Vector2D<int>(j, i));
+                if(GameObjectId::RIGHT_MONSTER <= impl[i][j] && impl[i][j] <= GameObjectId::UP_MONSTER)
+                    player_array[(int)(impl[i][j] - GameObjectId::RIGHT_MONSTER)] << (Monster*)obj[i][j];
+            }
         }
 
     int* operator [](int n) { return impl[n]; }
 
     bool is_valid_operation();
+
+    void apply(Operation op)
+    {
+        Player player = op.player;
+        for(Monster* e : player_array[player])
+            e->move(op);
+    }
 
     void draw() const
     {
@@ -199,6 +223,8 @@ public:
         {
             // test
         }
+        std::optional<Operation> op = pannel.get_operation();
+        if(op)stage.apply(op.value());
     }
 
     void draw() const override
@@ -209,7 +235,11 @@ public:
 
         stage.draw();
         pannel.draw();
-        if(pannel.get_operation()) Print << pannel.get_operation().value().to_string();
+        std::optional<Operation> op = pannel.get_operation();
+        if(op) 
+        {
+            Print << op.value().to_string();
+        }
     }
 };
 
