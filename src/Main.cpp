@@ -211,9 +211,13 @@ private:
     ControlPannel pannel;
     Stage stage;
 
+    ColorF mul;
+    bool is_pause;
+
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(600, 400, 100), stage(loadStage(U"../Resources/stages/stage01"))
+        : IScene(init), pannel(600, 400, 100), stage(loadStage(U"../Resources/stages/stage01")),
+        mul(0.3, 0.3, 0.3, 0.9), is_pause(false)
     {
     }
 
@@ -223,8 +227,15 @@ public:
         {
             // test
         }
-        std::optional<Operation> op = pannel.get_operation();
-        if(op)stage.apply(op.value());
+        if(KeyP.down())
+        {
+            is_pause = !is_pause;
+        }
+        if (!is_pause)
+        {
+            std::optional<Operation> op = pannel.get_operation();
+            if(op)stage.apply(op.value());
+        }
     }
 
     void draw() const override
@@ -232,13 +243,19 @@ public:
         // button.draw();
         // if(button.released())
         //     Print << U"RELEASED!";
+        if (is_pause) {
+            const ScopedColorMul2D state(mul);
 
-        stage.draw();
-        pannel.draw();
-        std::optional<Operation> op = pannel.get_operation();
-        if(op) 
-        {
-            Print << op.value().to_string();
+            stage.draw();
+            pannel.draw();
+        } else {
+            stage.draw();
+            pannel.draw();
+            std::optional<Operation> op = pannel.get_operation();
+            if(op)
+            {
+                Print << op.value().to_string();
+            }
         }
     }
 };
