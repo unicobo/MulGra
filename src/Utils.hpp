@@ -32,6 +32,12 @@ Vec2 direction2vec2(Direction direction)
     return _direction2vec2[direction];
 }
 
+Vector2D<int> direction2vector2d(Direction direction)
+{
+    static const Vector2D<int> _direction2vector2d[4] = {Vector2D<int>(1, 0), Vector2D<int>(0, 1), Vector2D<int>(-1, 0), Vector2D<int>(0, -1)};
+    return _direction2vector2d[direction];
+}
+
 struct Operation
 {
     Player player;

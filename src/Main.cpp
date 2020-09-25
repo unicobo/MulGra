@@ -112,6 +112,16 @@ class Stage
     const double grid_size;
     Array<Monster*> player_array[4];
 
+    typedef enum
+    {
+        READY = 0,
+        MOVE,
+        DROP
+    }State;
+    
+    State state = State::READY;
+    Direction drop_direction;
+
     GameObject* make_object(GameObjectId id, Vector2D<int> pos_in_grid)
     {
         switch (id)
@@ -140,6 +150,59 @@ class Stage
         }
     }
 
+
+void swap_pos(Vector2D<int> pos1, Vector2D<int> pos2)
+    {
+        int tmp_impl = impl[pos1.y][pos1.x];
+        impl[pos1.y][pos1.x] = impl[pos2.y][pos2.x];
+        impl[pos2.y][pos2.x] = tmp_impl;
+        GameObject* tmp_obj = obj[pos1.y][pos1.x];
+        obj[pos1.y][pos1.x] = obj[pos2.y][pos2.x];
+        obj[pos2.y][pos2.x] = tmp_obj;
+    }
+
+    bool _move(Vector2D<int> pos, Operation op)
+    {
+        Direction dir = op.direction;
+        if(!in_range(pos)) return false;
+        GameObjectId id = (GameObjectId)(impl[pos.y][pos.x]);
+        if(id == GameObjectId::BLOCK) return false;
+        if(id == GameObjectId::EMPTY) return true;
+        if(GameObjectId::RIGHT_MONSTER <= id && id <= GameObjectId::UP_MONSTER)
+        {
+            Vector2D<int> nxt_pos = pos + direction2vector2d(dir);
+            if(_move(nxt_pos, op))
+            {
+                ((Monster*)(obj[pos.y][pos.x]))->move(op);
+                swap_pos(pos, nxt_pos);
+                return true;
+            }
+            return false;
+        }
+        // いつか追加するかも
+        Print << U"ERROR";
+        return false;
+    }
+
+    int _drop(Vector2D<int> pos)
+    {
+        if(GameObjectId::RIGHT_MONSTER <= impl[pos.y][pos.x] && impl[pos.y][pos.x] <= GameObjectId::UP_MONSTER)
+        {
+            Direction dir = (Direction)(impl[pos.y][pos.x] - GameObjectId::RIGHT_MONSTER);
+            Vector2D current_pos = pos + direction2vector2d(dir);
+            int gap = 0;
+            while(in_range(current_pos) && impl[current_pos.y][current_pos.x] == GameObjectId::EMPTY)
+            {
+                current_pos += direction2vector2d(dir);
+                gap++;
+            }
+            ((Monster*)(obj[pos.y][pos.x]))->drop(gap);
+            swap_pos(pos, pos + gap * direction2vector2d(dir));
+            return gap;
+        }
+        else return 0;
+    }
+
 public:
     Stage(Vec2 base_pos, Vec2 stage_size, Grid<int> _impl)
         : impl(_impl)
@@ -162,11 +225,58 @@ public:
 
     bool is_valid_operation();
 
+    bool in_range(Vector2D<int> pos)
+    {
+        return 0 <= pos.x && pos.x < (int)impl.width() && 0 <= pos.y && pos.y < (int)impl.height();
+    }
+
+    bool update()
+    {
+        // Print << state << U" : " << Time::GetSec();
+        bool updated = false;
+        for(int i = 0; i < 4; i++)
+            for(Monster* e : player_array[i])
+                updated |= e->update();
+
+        if(!updated && state == State::MOVE)state = State::DROP;
+        
+        if(!updated && state == State::DROP)
+        {
+            for(int i = 0; i <= 4; i++)
+            {
+                if(i == 4)
+                {
+                    state = State::READY;
+                    break;
+                }
+                int sum_head = 0;
+                Direction current_direction = (Direction)((drop_direction + i) % 4);
+                for(Monster* e : player_array[current_direction])
+                    sum_head += _drop(e->get_pos_in_grid());
+                
+                if(sum_head != 0)
+                {
+                    drop_direction = (Direction)((current_direction + 1) % 4);
+                    break;
+                }
+            }
+        }
+    }
+
     void apply(Operation op)
     {
+        if(state != State::READY)return;
         Player player = op.player;
+        Direction dir = op.direction;
+        state = State::MOVE;
+        drop_direction = dir;
         for(Monster* e : player_array[player])
-            e->move(op);
+        {
+            Vector2D<int> pos = e->get_pos_in_grid();
+         
+            if(_move(pos, op))
+                _drop(pos - direction2vector2d(dir));
+        }
     }
 
     void draw() const
@@ -224,6 +334,7 @@ public:
             // test
         }
         std::optional<Operation> op = pannel.get_operation();
+        stage.update();
         if(op)stage.apply(op.value());
     }
 
