@@ -236,6 +236,10 @@ public:
             std::optional<Operation> op = pannel.get_operation();
             if(op)stage.apply(op.value());
         }
+        else if(SimpleGUI::ButtonAt(U"Back to the title", Scene::Center()))
+        {
+            changeScene(STitle);
+        }
     }
 
     void draw() const override
@@ -244,10 +248,12 @@ public:
         // if(button.released())
         //     Print << U"RELEASED!";
         if (is_pause) {
-            const ScopedColorMul2D state(mul);
+            {
+                const ScopedColorMul2D state(mul);
 
-            stage.draw();
-            pannel.draw();
+                stage.draw();
+                pannel.draw();
+            }
         } else {
             stage.draw();
             pannel.draw();
