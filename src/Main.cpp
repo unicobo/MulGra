@@ -102,14 +102,14 @@ public:
 
 class Stage
 {
-    Grid<int> impl;
+    // Grid<int> impl; // TODO: kesu
     Grid<GameObject*> obj;
 
     const Vec2 BASE_POS;
     const Vec2 STAGE_SIZE;
-    const int col;
-    const int row;
-    const double grid_size;
+    int col;
+    int row;
+    double grid_size;
     Array<Monster*> player_array[4];
 
     typedef enum
@@ -122,40 +122,8 @@ class Stage
     State state = State::READY;
     Direction drop_direction;
 
-    GameObject* make_object(GameObjectId id, Vector2D<int> pos_in_grid)
+    void swap_pos(Vector2D<int> pos1, Vector2D<int> pos2)
     {
-        switch (id)
-        {
-        case GameObjectId::EMPTY:
-            return new Empty(BASE_POS, pos_in_grid, grid_size);
-            break;
-        case GameObjectId::BLOCK:
-            return new Block(BASE_POS, pos_in_grid, grid_size);
-            break;
-        case GameObjectId::RIGHT_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        case GameObjectId::DOWN_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        case GameObjectId::LEFT_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        case GameObjectId::UP_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        default:
-            return new GameObject(BASE_POS, pos_in_grid, grid_size);
-            break;
-        }
-    }
-
-
-void swap_pos(Vector2D<int> pos1, Vector2D<int> pos2)
-    {
-        int tmp_impl = impl[pos1.y][pos1.x];
-        impl[pos1.y][pos1.x] = impl[pos2.y][pos2.x];
-        impl[pos2.y][pos2.x] = tmp_impl;
         GameObject* tmp_obj = obj[pos1.y][pos1.x];
         obj[pos1.y][pos1.x] = obj[pos2.y][pos2.x];
         obj[pos2.y][pos2.x] = tmp_obj;
@@ -165,7 +133,7 @@ void swap_pos(Vector2D<int> pos1, Vector2D<int> pos2)
     {
         Direction dir = op.direction;
         if(!in_range(pos)) return false;
-        GameObjectId id = (GameObjectId)(impl[pos.y][pos.x]);
+        GameObjectId id = get_id(pos);
         if(id == GameObjectId::BLOCK) return false;
         if(id == GameObjectId::EMPTY) return true;
         if(GameObjectId::RIGHT_MONSTER <= id && id <= GameObjectId::UP_MONSTER)
@@ -186,61 +154,122 @@ void swap_pos(Vector2D<int> pos1, Vector2D<int> pos2)
 
     int _drop(Vector2D<int> pos)
     {
-        if(GameObjectId::RIGHT_MONSTER <= impl[pos.y][pos.x] && impl[pos.y][pos.x] <= GameObjectId::UP_MONSTER)
+        GameObjectId current_id = get_id(pos);
+        if(GameObjectId::RIGHT_MONSTER <= current_id && current_id <= GameObjectId::UP_MONSTER)
         {
-            Direction dir = (Direction)(impl[pos.y][pos.x] - GameObjectId::RIGHT_MONSTER);
+            Direction dir = (Direction)(current_id - GameObjectId::RIGHT_MONSTER);
             Vector2D current_pos = pos + direction2vector2d(dir);
             int gap = 0;
-            while(in_range(current_pos) && impl[current_pos.y][current_pos.x] == GameObjectId::EMPTY)
+            while(in_range(current_pos) && get_id(current_pos) == GameObjectId::EMPTY)
             {
                 current_pos += direction2vector2d(dir);
                 gap++;
             }
-            ((Monster*)(obj[pos.y][pos.x]))->drop(gap);
-            swap_pos(pos, pos + gap * direction2vector2d(dir));
+            if(gap)
+            {
+                ((Monster*)(obj[pos.y][pos.x]))->drop(gap);
+                swap_pos(pos, pos + gap * direction2vector2d(dir));
+            }
             return gap;
         }
         else return 0;
     }
 
 public:
-    Stage(Vec2 base_pos, Vec2 stage_size, Grid<int> _impl)
-        : impl(_impl)
-        , obj(Grid<GameObject*>(_impl.width(), _impl.height()))
+    Stage(Vec2 base_pos, Vec2 stage_size, Grid<GameObject*> _obj)
+        : obj(_obj)
         , BASE_POS(base_pos)
         , STAGE_SIZE(stage_size)
-        , col(_impl.width())
-        , row(_impl.height())
+        , col(_obj.width())
+        , row(_obj.height())
         , grid_size(Min(stage_size.y/row, stage_size.x/col))
         {
             for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
             {
-                obj[i][j] = make_object((GameObjectId)impl[i][j], Vector2D<int>(j, i));
-                if(GameObjectId::RIGHT_MONSTER <= impl[i][j] && impl[i][j] <= GameObjectId::UP_MONSTER)
-                    player_array[(int)(impl[i][j] - GameObjectId::RIGHT_MONSTER)] << (Monster*)obj[i][j];
+                GameObjectId current_id = get_id(Vector2D(j, i));
+                if(GameObjectId::RIGHT_MONSTER <= current_id && current_id <= GameObjectId::UP_MONSTER)
+                    player_array[current_id - GameObjectId::RIGHT_MONSTER] << (Monster*)obj[i][j];
             }
         }
 
-    int* operator [](int n) { return impl[n]; }
+    Stage(Vec2 _base_pos, Vec2 _stage_size)
+        : BASE_POS(_base_pos)
+        , STAGE_SIZE(_stage_size)
+        {
+            row = 0;
+            col = 0;
+            grid_size = 0;
+        }
 
-    bool is_valid_operation();
+    void load_stage(int stage_id)
+    {    
+        String filename = U"../Resources/stages/stage{:0>2}"_fmt(stage_id);
+
+        TextReader reader(filename);
+
+        if(!reader)
+        {
+            throw Error(U"Failed to open `{}`"_fmt(filename));
+        }
+
+        String line;
+
+        reader.readLine(line);
+        col = Parse<int>(line);
+        reader.readLine(line);
+        row = Parse<int>(line);
+
+        grid_size = Min(STAGE_SIZE.y / row, STAGE_SIZE.x / col);
+
+        for(int i = 0; i < 4; i++)player_array[i].clear();
+
+        Grid<GameObject*> new_obj(col, row);
+        for(int i = 0; i < row; i++)
+        {
+            reader.readLine(line);
+            Array<String> ids = line.split(' ');
+            for(int j = 0; j < col; j++)
+            {
+                new_obj[i][j] = make_object(BASE_POS, (GameObjectId)Parse<int>(ids[j]), Vector2D<int>(j, i));
+                GameObjectId id = new_obj[i][j]->get_id();
+                if(GameObjectId::RIGHT_MONSTER <= id && id <= GameObjectId::UP_MONSTER)
+                    player_array[id - GameObjectId::RIGHT_MONSTER] << (Monster*)new_obj[i][j];
+            }
+        }
+
+        obj = new_obj;
+    }
+
+    GameObject** operator [](int n) { return obj[n]; }
+
+    GameObject* get_obj(Vector2D<int> pos)
+    {
+        return obj[pos.y][pos.x];
+    }
+
+    GameObjectId get_id(Vector2D<int> pos)
+    {
+        return get_obj(pos)->get_id();
+    }
 
     bool in_range(Vector2D<int> pos)
     {
-        return 0 <= pos.x && pos.x < (int)impl.width() && 0 <= pos.y && pos.y < (int)impl.height();
+        return 0 <= pos.x && pos.x < (int)obj.width() && 0 <= pos.y && pos.y < (int)obj.height();
     }
 
     bool update()
     {
-        // Print << state << U" : " << Time::GetSec();
-        bool updated = false;
+        bool is_active = false;
         for(int i = 0; i < 4; i++)
             for(Monster* e : player_array[i])
-                updated |= e->update();
+            {
+                e->update();
+                is_active |= e->is_active();
+            }
 
-        if(!updated && state == State::MOVE)state = State::DROP;
+        if(!is_active && state == State::MOVE)state = State::DROP;
         
-        if(!updated && state == State::DROP)
+        if(!is_active && state == State::DROP)
         {
             for(int i = 0; i <= 4; i++)
             {
@@ -266,9 +295,9 @@ public:
     void apply(Operation op)
     {
         if(state != State::READY)return;
+        state = State::MOVE;
         Player player = op.player;
         Direction dir = op.direction;
-        state = State::MOVE;
         drop_direction = dir;
         for(Monster* e : player_array[player])
         {
@@ -277,43 +306,23 @@ public:
             if(_move(pos, op))
                 _drop(pos - direction2vector2d(dir));
         }
+
+        /*
+        for(int i = 0; i < row; i++)
+        {
+            Array<int> array;
+            for(int j = 0; j < col; j++)array << impl[i][j];
+            Print << array;
+        }
+        */
     }
 
     void draw() const
     {
         for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
-            obj[i][j]->draw();
+            obj[i][j]->draw(grid_size);
     }
 };
-
-
-Stage loadStage(String filename)
-{
-    TextReader reader(filename);
-
-    if (!reader)
-    {
-        throw Error(U"Failed to open `{}`"_fmt(filename));
-    }
-
-    String line;
-
-    reader.readLine(line);
-    int col = Parse<int>(line);
-    reader.readLine(line);
-    int row = Parse<int>(line);
-    // Stage result(Vec2(20,20), Vec2(400, 500), col, row);
-
-    Grid<int> impl(col, row);
-    for(int i = 0; i < row; i++)
-    {
-        reader.readLine(line);
-        Array<String> ids = line.split(' ');
-        for(int j = 0; j < col; j++)impl[i][j] = Parse<int>(ids[j]);
-    }
-
-    return Stage(Vec2(20, 20), Vec2(400, 500), impl);
-}
 
 class Game : public App::Scene
 {
@@ -323,8 +332,9 @@ private:
 
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(600, 400, 100), stage(loadStage(U"../Resources/stages/stage01"))
+        : IScene(init), pannel(600, 400, 100), stage(Vec2(20, 20), Vec2(400, 500))
     {
+        stage.load_stage(1);
     }
 
     void update() override
@@ -346,11 +356,6 @@ public:
 
         stage.draw();
         pannel.draw();
-        std::optional<Operation> op = pannel.get_operation();
-        if(op) 
-        {
-            Print << op.value().to_string();
-        }
     }
 };
 

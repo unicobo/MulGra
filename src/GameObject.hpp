@@ -18,7 +18,6 @@ class GameObject
 protected:
     const Vec2 base_pos;
     Vector2D<int> pos_in_grid;
-    double grid_size;
     GameObjectId id;
 
     // feature
@@ -29,14 +28,13 @@ public:
         : base_pos(Vec2(0, 0))
         {};
 
-    GameObject(Vec2 _base_pos , Vector2D<int> _pos_in_grid, double _grid_size, GameObjectId _id = GameObjectId::GAME_OBJECT)
+    GameObject(Vec2 _base_pos , Vector2D<int> _pos_in_grid, GameObjectId _id = GameObjectId::GAME_OBJECT)
         : base_pos(_base_pos)
         , pos_in_grid(_pos_in_grid)
-        , grid_size(_grid_size)
         , id(_id)
         {};
 
-    virtual void draw() const
+    virtual void draw(double grid_size) const
     {
         static Font font(grid_size / 5);
         
@@ -54,11 +52,11 @@ public:
 class Empty : public GameObject
 {
 public:
-    Empty(Vec2 _base_pos , Vector2D<int> _pos_in_grid, double _grid_size)
-        : GameObject(_base_pos, _pos_in_grid, _grid_size, GameObjectId::EMPTY)
+    Empty(Vec2 _base_pos , Vector2D<int> _pos_in_grid)
+        : GameObject(_base_pos, _pos_in_grid, GameObjectId::EMPTY)
         {};
         
-    void draw() const {}
+    void draw(double grid_size) const {}
 };
 
 class Block : public GameObject
@@ -74,11 +72,11 @@ class Block : public GameObject
     const Color EYE_COLOR = Palette::White;
 
 public:
-    Block(Vec2 _base_pos , Vector2D<int> _pos_in_grid, double _grid_size)
-        : GameObject(_base_pos, _pos_in_grid, _grid_size, GameObjectId::BLOCK)
+    Block(Vec2 _base_pos , Vector2D<int> _pos_in_grid)
+        : GameObject(_base_pos, _pos_in_grid, GameObjectId::BLOCK)
         {};
         
-    void draw() const
+    void draw(double grid_size) const
     {
         // Rect(base_pos.x + grid_size * pos_in_grid.x, base_pos.y + grid_size * pos_in_grid.y, grid_size, grid_size)
         //     .draw(BLOCK_COLOR);
@@ -121,8 +119,8 @@ class Monster : public GameObject
     const Color EYE_COLOR = Palette::Black;
 
 public:
-    Monster(Vec2 _base_pos , Vector2D<int> _pos_in_grid, double _grid_size, GameObjectId _id)
-        : GameObject(_base_pos, _pos_in_grid, _grid_size, _id)
+    Monster(Vec2 _base_pos , Vector2D<int> _pos_in_grid, GameObjectId _id)
+        : GameObject(_base_pos, _pos_in_grid, _id)
         , pre_pos_in_grid(_pos_in_grid)
         , pos(_pos_in_grid.x, _pos_in_grid.y)
         {};
@@ -132,7 +130,7 @@ public:
         if(is_moving())
         {
             double t = Min(move_stopwatch.sF(), 1.0 / MOVE_SPEED_RATE) * MOVE_SPEED_RATE;
-            t = EaseInOutExpo(t);
+            t = EaseOutExpo(t);
             Vec2 pre_pos = pos;
             Vec2 _pre_pos_in_grid(pre_pos_in_grid.x, pre_pos_in_grid.y);
             Vec2 _pos_in_grid(pos_in_grid.x, pos_in_grid.y);
@@ -170,7 +168,7 @@ public:
 
     void drop(int gap)
     {
-        if(!is_active())
+        if(gap && !is_active())
         {
             drop_stopwatch.restart();
             pre_pos_in_grid = pos_in_grid;
@@ -189,7 +187,7 @@ public:
         return is_moving() || is_dropping();
     }
 
-    void draw() const
+    void draw(double grid_size) const
     {
         Vec2 draw_pos = Vec2(base_pos.x + grid_size * pos.x, base_pos.y + grid_size * pos.y);
         Player player = (Player)(id - GameObjectId::RIGHT_MONSTER);
@@ -207,3 +205,31 @@ public:
                      grid_size * EYE_SIZE_PROPORTION).draw(EYE_COLOR);
     }
 };
+
+GameObject* make_object(Vec2 base_pos, GameObjectId id, Vector2D<int> pos_in_grid)
+{
+    switch (id)
+    {
+    case GameObjectId::EMPTY:
+        return new Empty(base_pos, pos_in_grid);
+        break;
+    case GameObjectId::BLOCK:
+        return new Block(base_pos, pos_in_grid);
+        break;
+    case GameObjectId::RIGHT_MONSTER:
+        return new Monster(base_pos, pos_in_grid, id);
+        break;
+    case GameObjectId::DOWN_MONSTER:
+        return new Monster(base_pos, pos_in_grid, id);
+        break;
+    case GameObjectId::LEFT_MONSTER:
+        return new Monster(base_pos, pos_in_grid, id);
+        break;
+    case GameObjectId::UP_MONSTER:
+        return new Monster(base_pos, pos_in_grid, id);
+        break;
+    default:
+        return new GameObject(base_pos, pos_in_grid);
+        break;
+    }
+}
