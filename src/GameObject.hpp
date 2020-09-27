@@ -10,6 +10,10 @@ typedef enum
     DOWN_MONSTER,
     LEFT_MONSTER,
     UP_MONSTER,
+    RIGHT_GOAL,
+    DOWN_GOAL,
+    LEFT_GOAL,
+    UP_GOAL,
     GAME_OBJECT
 } GameObjectId;
 
@@ -206,6 +210,25 @@ public:
     }
 };
 
+class Goal : public GameObject
+{
+    const double GOAL_SIZE_PROPORTION = 0.8;
+    const double FRAME_PROPORTION = 0.1;
+    const int A = 150;
+public:
+    Goal(Vec2 _base_pos , Vector2D<int> _pos_in_grid, GameObjectId _id)
+        : GameObject(_base_pos, _pos_in_grid, _id)
+        {}
+
+    void draw(double grid_size) const
+    {
+        Vec2 draw_pos = Vec2(base_pos.x + grid_size * pos_in_grid.x, base_pos.y + grid_size * pos_in_grid.y) + grid_size * (1 - GOAL_SIZE_PROPORTION) / 2 * Vec2(1, 1);
+
+        Rect(draw_pos.x, draw_pos.y, grid_size * GOAL_SIZE_PROPORTION, grid_size * GOAL_SIZE_PROPORTION)
+            .drawFrame(grid_size * FRAME_PROPORTION, 0, Color(player2color((Player)(id - GameObjectId::RIGHT_GOAL)), A));
+    }
+};
+
 GameObject* make_object(Vec2 base_pos, GameObjectId id, Vector2D<int> pos_in_grid)
 {
     switch (id)
@@ -227,6 +250,18 @@ GameObject* make_object(Vec2 base_pos, GameObjectId id, Vector2D<int> pos_in_gri
         break;
     case GameObjectId::UP_MONSTER:
         return new Monster(base_pos, pos_in_grid, id);
+        break;
+    case GameObjectId::RIGHT_GOAL:
+        return new Goal(base_pos, pos_in_grid, id);
+        break;
+    case GameObjectId::DOWN_GOAL:
+        return new Goal(base_pos, pos_in_grid, id);
+        break;
+    case GameObjectId::LEFT_GOAL:
+        return new Goal(base_pos, pos_in_grid, id);
+        break;
+    case GameObjectId::UP_GOAL:
+        return new Goal(base_pos, pos_in_grid, id);
         break;
     default:
         return new GameObject(base_pos, pos_in_grid);
