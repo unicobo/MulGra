@@ -122,7 +122,7 @@ public:
         }
         if(KeyR.pressed())
             stage.load_stage(1);
-        std::optional<Operation> op = pannel.get_operation();
+        Optional<Operation> op = pannel.get_operation();
         stage.update();
         if(op)stage.apply(op.value());
     }
