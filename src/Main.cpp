@@ -141,6 +141,14 @@ public:
         Optional<Operation> op = pannel.get_operation();
         stage.update();
         if(op)stage.apply(op.value());
+
+        if (stage.state == Stage::State::CLEAR)
+        {
+            if (SimpleGUI::ButtonAt(U"Back to the title", Scene::Center()))
+            {
+                changeScene(STitle);
+            }
+        }
     }
 
     void draw() const override

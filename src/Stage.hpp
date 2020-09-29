@@ -16,16 +16,6 @@ class Stage
     Array<Monster*> player_array[4];
     Array<Goal*> goal_array[4]; 
 
-    typedef enum
-    {
-        READY = 0,
-        MOVE,
-        DROP,
-        CHECK,
-        CLEAR
-    }State;
-    
-    State state = State::READY;
     Direction drop_direction;
 
     void swap_pos(Vector2D<int> pos1, Vector2D<int> pos2)
@@ -82,6 +72,17 @@ class Stage
     }
 
 public:
+    typedef enum
+    {
+        READY = 0,
+        MOVE,
+        DROP,
+        CHECK,
+        CLEAR
+    }State;
+    
+    State state = State::READY;
+
     Stage(Vec2 base_pos, Vec2 stage_size, Grid<GameObject*> _obj)
         : obj(_obj)
         , BASE_POS(base_pos)
@@ -180,11 +181,6 @@ public:
 
     bool update()
     {
-        if(state == State::CLEAR)
-        {
-            Print << U"CLEAR";
-            return false;
-        }
 
         bool is_active = false;
         for(int i = 0; i < 4; i++)
@@ -245,7 +241,6 @@ public:
             }
         case State::CLEAR:
             {
-                Print << U"CLEAR";
                 break;
             }
         default:
