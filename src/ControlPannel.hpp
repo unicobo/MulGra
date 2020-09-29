@@ -42,7 +42,7 @@ public:
             }
         };
 
-    std::optional<Operation> get_operation() const
+    Optional<Operation> get_operation() const
     {
         for(int i = 0; i < BUTTON_NUM; i++)
         {
@@ -50,7 +50,7 @@ public:
             if(op)
                 return op;
         }
-        return std::nullopt;
+        return none;
     }
 
     void draw() const
