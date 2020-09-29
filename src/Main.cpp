@@ -1,7 +1,8 @@
 #include <Siv3D.hpp>
 #include "ControlPannel.hpp"
 // #include "Monster.hpp"
-#include "GameObject.hpp"
+// #include "GameObject.hpp"
+#include "Stage.hpp"
 
 const String team_name = U"unicobo";
 
@@ -100,111 +101,6 @@ public:
     }
 };
 
-class Stage
-{
-    Grid<int> impl;
-    Grid<GameObject*> obj;
-
-    const Vec2 BASE_POS;
-    const Vec2 STAGE_SIZE;
-    const int col;
-    const int row;
-    const double grid_size;
-    Array<Monster*> player_array[4];
-
-    GameObject* make_object(GameObjectId id, Vector2D<int> pos_in_grid)
-    {
-        switch (id)
-        {
-        case GameObjectId::EMPTY:
-            return new Empty(BASE_POS, pos_in_grid, grid_size);
-            break;
-        case GameObjectId::BLOCK:
-            return new Block(BASE_POS, pos_in_grid, grid_size);
-            break;
-        case GameObjectId::RIGHT_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        case GameObjectId::DOWN_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        case GameObjectId::LEFT_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        case GameObjectId::UP_MONSTER:
-            return new Monster(BASE_POS, pos_in_grid, grid_size, id);
-            break;
-        default:
-            return new GameObject(BASE_POS, pos_in_grid, grid_size);
-            break;
-        }
-    }
-
-public:
-    Stage(Vec2 base_pos, Vec2 stage_size, Grid<int> _impl)
-        : impl(_impl)
-        , obj(Grid<GameObject*>(_impl.width(), _impl.height()))
-        , BASE_POS(base_pos)
-        , STAGE_SIZE(stage_size)
-        , col(_impl.width())
-        , row(_impl.height())
-        , grid_size(Min(stage_size.y/row, stage_size.x/col))
-        {
-            for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
-            {
-                obj[i][j] = make_object((GameObjectId)impl[i][j], Vector2D<int>(j, i));
-                if(GameObjectId::RIGHT_MONSTER <= impl[i][j] && impl[i][j] <= GameObjectId::UP_MONSTER)
-                    player_array[(int)(impl[i][j] - GameObjectId::RIGHT_MONSTER)] << (Monster*)obj[i][j];
-            }
-        }
-
-    int* operator [](int n) { return impl[n]; }
-
-    bool is_valid_operation();
-
-    void apply(Operation op)
-    {
-        Player player = op.player;
-        for(Monster* e : player_array[player])
-            e->move(op);
-    }
-
-    void draw() const
-    {
-        for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
-            obj[i][j]->draw();
-    }
-};
-
-
-Stage loadStage(String filename)
-{
-    TextReader reader(filename);
-
-    if (!reader)
-    {
-        throw Error(U"Failed to open `{}`"_fmt(filename));
-    }
-
-    String line;
-
-    reader.readLine(line);
-    int col = Parse<int>(line);
-    reader.readLine(line);
-    int row = Parse<int>(line);
-    // Stage result(Vec2(20,20), Vec2(400, 500), col, row);
-
-    Grid<int> impl(col, row);
-    for(int i = 0; i < row; i++)
-    {
-        reader.readLine(line);
-        Array<String> ids = line.split(' ');
-        for(int j = 0; j < col; j++)impl[i][j] = Parse<int>(ids[j]);
-    }
-
-    return Stage(Vec2(20, 20), Vec2(400, 500), impl);
-}
-
 class Game : public App::Scene
 {
 private:
@@ -213,8 +109,9 @@ private:
 
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(600, 400, 100), stage(loadStage(U"../Resources/stages/stage01"))
+        : IScene(init), pannel(600, 400, 300), stage(Vec2(20, 20), Vec2(400, 500))
     {
+        stage.load_stage(1);
     }
 
     void update() override
@@ -223,7 +120,10 @@ public:
         {
             // test
         }
-        std::optional<Operation> op = pannel.get_operation();
+        if(KeyR.pressed())
+            stage.load_stage(1);
+        Optional<Operation> op = pannel.get_operation();
+        stage.update();
         if(op)stage.apply(op.value());
     }
 
@@ -235,11 +135,6 @@ public:
 
         stage.draw();
         pannel.draw();
-        std::optional<Operation> op = pannel.get_operation();
-        if(op) 
-        {
-            Print << op.value().to_string();
-        }
     }
 };
 

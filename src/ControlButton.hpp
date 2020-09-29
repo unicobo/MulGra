@@ -70,10 +70,10 @@ public:
         return rect.leftReleased();
     }
 
-    std::optional<Operation> get_operation() const
+    Optional<Operation> get_operation() const
     {
         if(released())
             return Operation(player, direction);
-        return std::nullopt;
+        return none;
     }
 };
