@@ -250,6 +250,14 @@ public:
         }
     }
 
+    void pause()
+    {
+        for(int i = 0; i < 4; i++)for(Monster* e : player_array[i])
+        {
+            e->pause();
+        }
+    }
+
     void apply(Operation op)
     {
         if(state != State::READY)return;

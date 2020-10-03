@@ -131,6 +131,9 @@ public:
 
     bool update()
     {
+        if(move_stopwatch.isPaused())move_stopwatch.resume();
+        if(drop_stopwatch.isPaused())drop_stopwatch.resume();
+
         if(is_moving())
         {
             double t = Min(move_stopwatch.sF(), 1.0 / MOVE_SPEED_RATE) * MOVE_SPEED_RATE;
@@ -153,6 +156,8 @@ public:
             return pos != pre_pos;
         }
     }
+
+    void pause() {move_stopwatch.pause(); drop_stopwatch.pause();Print << U"Pause";}
 
     void move(Operation op)
     {

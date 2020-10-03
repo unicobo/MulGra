@@ -126,6 +126,7 @@ public:
         if(KeyP.down())
         {
             is_pause = !is_pause;
+            if(is_pause)stage.pause();
         }
 
         // usual
