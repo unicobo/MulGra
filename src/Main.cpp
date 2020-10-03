@@ -108,7 +108,7 @@ private:
     Stage stage;
 
     ColorF mul;
-    bool is_pause;
+    bool is_pause = false;
 
 public:
     Game(const InitData &init)
@@ -127,28 +127,34 @@ public:
         {
             is_pause = !is_pause;
         }
+
+        // usual
         if (!is_pause)
         {
+            // reload
+            if(KeyR.pressed())
+                stage.load_stage(1);
+
+            // update and apply
             Optional<Operation> op = pannel.get_operation();
             if(op)stage.apply(op.value());
+            stage.update();
+
+            // clear
+            if (stage.is_game_clear())
+            {
+                if (SimpleGUI::ButtonAt(U"Back to the title", Scene::Center()))
+                {
+                    changeScene(STitle);
+                }
+            }
         }
+        // pause
         else if(SimpleGUI::ButtonAt(U"Back to the title", Scene::Center()))
         {
             changeScene(STitle);
         }
-        if(KeyR.pressed())
-            stage.load_stage(1);
-        Optional<Operation> op = pannel.get_operation();
-        stage.update();
-        if(op)stage.apply(op.value());
-
-        if (stage.state == Stage::State::CLEAR)
-        {
-            if (SimpleGUI::ButtonAt(U"Back to the title", Scene::Center()))
-            {
-                changeScene(STitle);
-            }
-        }
+        
     }
 
     void draw() const override
@@ -156,21 +162,21 @@ public:
         // button.draw();
         // if(button.released())
         //     Print << U"RELEASED!";
-        if (is_pause) {
-            {
-                const ScopedColorMul2D state(mul);
 
-                stage.draw();
-                pannel.draw();
-            }
+        if (is_pause) {
+            //
+            // const ScopedColorMul2D state(mul);
+
+            stage.draw();
+            pannel.draw();
+
+            SimpleGUI::ButtonAt(U"Back to the title", Scene::Center());
         } else {
             stage.draw();
             pannel.draw();
-            Optional<Operation> op = pannel.get_operation();
-            if(op)
-            {
-                Print << op.value().to_string();
-            }
+
+            if(stage.is_game_clear())
+                SimpleGUI::ButtonAt(U"Back to the title", Scene::Center());
         }
     }
 };
