@@ -107,9 +107,12 @@ private:
     ControlPannel pannel;
     Stage stage;
 
+    ColorF mul;
+    bool is_pause = false;
+
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(600, 400, 300), stage(Vec2(20, 20), Vec2(400, 500))
+        : IScene(init), pannel(600, 400, 300), stage(Vec2(20, 20), Vec2(400, 500)), mul(0.3, 0.3, 0.3)
     {
         stage.load_stage(1);
     }
@@ -120,11 +123,39 @@ public:
         {
             // test
         }
-        if(KeyR.pressed())
-            stage.load_stage(1);
-        Optional<Operation> op = pannel.get_operation();
-        stage.update();
-        if(op)stage.apply(op.value());
+        if(KeyP.down())
+        {
+            is_pause = !is_pause;
+            if(is_pause)stage.pause();
+        }
+
+        // usual
+        if (!is_pause)
+        {
+            // reload
+            if(KeyR.pressed())
+                stage.load_stage(1);
+
+            // update and apply
+            Optional<Operation> op = pannel.get_operation();
+            if(op)stage.apply(op.value());
+            stage.update();
+
+            // clear
+            if (stage.is_game_clear())
+            {
+                if (SimpleGUI::ButtonAt(U"Back to the title", Scene::Center()))
+                {
+                    changeScene(STitle);
+                }
+            }
+        }
+        // pause
+        else if(SimpleGUI::ButtonAt(U"Back to the title", Scene::Center()))
+        {
+            changeScene(STitle);
+        }
+        
     }
 
     void draw() const override
@@ -133,8 +164,22 @@ public:
         // if(button.released())
         //     Print << U"RELEASED!";
 
-        stage.draw();
-        pannel.draw();
+        if (is_pause) {
+            {
+                const ScopedColorMul2D state(mul);
+
+                stage.draw();
+                pannel.draw();
+            }
+
+            SimpleGUI::ButtonAt(U"Back to the title", Scene::Center());
+        } else {
+            stage.draw();
+            pannel.draw();
+
+            if(stage.is_game_clear())
+                SimpleGUI::ButtonAt(U"Back to the title", Scene::Center());
+        }
     }
 };
 
