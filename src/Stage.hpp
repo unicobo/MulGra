@@ -160,6 +160,8 @@ public:
             Vector2D<int> pos_in_grid = Vector2D<int>(Parse<int>(data[1]), Parse<int>(data[2]));
             goal_array[id - GameObjectId::RIGHT_GOAL] << (Goal*)make_object(BASE_POS, id, pos_in_grid);
         }
+
+        state = State::READY;
     }
 
     GameObject** operator [](int n) { return obj[n]; }
@@ -272,6 +274,8 @@ public:
         }
         */
     }
+
+    bool is_game_clear() const { return state == State::CLEAR; }
 
     void draw() const
     {
