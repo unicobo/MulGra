@@ -112,7 +112,7 @@ private:
 
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(600, 400, 300), stage(Vec2(20, 20), Vec2(400, 500))
+        : IScene(init), pannel(600, 400, 300), stage(Vec2(20, 20), Vec2(400, 500)), mul(0.3, 0.3, 0.3)
     {
         stage.load_stage(1);
     }
@@ -164,11 +164,12 @@ public:
         //     Print << U"RELEASED!";
 
         if (is_pause) {
-            //
-            // const ScopedColorMul2D state(mul);
+            {
+                const ScopedColorMul2D state(mul);
 
-            stage.draw();
-            pannel.draw();
+                stage.draw();
+                pannel.draw();
+            }
 
             SimpleGUI::ButtonAt(U"Back to the title", Scene::Center());
         } else {
