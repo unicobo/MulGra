@@ -157,7 +157,7 @@ public:
         }
     }
 
-    void pause() {move_stopwatch.pause(); drop_stopwatch.pause();Print << U"Pause";}
+    void pause() {move_stopwatch.pause(); drop_stopwatch.pause();}
 
     void move(Operation op)
     {
