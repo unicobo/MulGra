@@ -44,7 +44,7 @@ class Logo
     const Vec2 outer_pos;
     const Vec2 outer_size;
     Vec2 pos;
-    Grid<Monster> grid = Grid<Monster>(30, 9);
+    Grid<GameObject*> grid = Grid<GameObject*>(30, 9);
     double grid_size;
 
     int fid[9][30] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -54,7 +54,7 @@ class Logo
                       {0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 0, 2, 0, 0, 3, 0, 0, 3, 3, 0, 4, 0, 4, 0, 0, 0, 4, 0, 0},
                       {0, 1, 0, 0, 0, 1, 0, 2, 0, 2, 0, 0, 2, 0, 0, 3, 0, 0, 0, 3, 0, 4, 0, 0, 0, 4, 4, 4, 0, 0},
                       {0, 1, 0, 0, 0, 1, 0, 2, 0, 2, 0, 0, 2, 0, 0, 3, 3, 0, 0, 3, 0, 4, 0, 0, 0, 4, 0, 4, 0, 0},
-                      {0, 1, 0, 0, 0, 1, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 3, 3, 3, 3, 0, 4, 0, 0, 0, 4, 4, 4, 4, 0},
+                      {0, 1, 0, 0, 0, 1, 0, 2, 2, 2, 2, 0, 2, 2, 0, 0, 3, 3, 3, 3, 0, 4, 0, 0, 0, 4, 4, 4, 4, 0},
                       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 public:
@@ -66,7 +66,26 @@ public:
             Vec2 center_pos = _outer_pos + _outer_size / 2;
             pos = Vec2(center_pos.x - grid_size * grid.width() / 2, center_pos.y - grid_size * grid.height() / 2);
 
+            for(int i = 0; i < grid.height(); i++)for(int j = 0; j < grid.width(); j++)
+            {
+                switch (fid[i][j])
+                {
+                case 0:
+                    // grid[i][j] = new WhiteBlock(pos, Vec2(j, i));
+                    grid[i][j] = new Empty(pos, Vec2(j, i));
+                    break;
+                default:
+                    // grid[i][j] = new Monster(pos, Vec2(j, i), (GameObjectId)(GameObjectId::RIGHT_MONSTER + Random<int>(3)));
+                    grid[i][j] = new Monster(pos, Vec2(j, i), (GameObjectId)(GameObjectId::RIGHT_MONSTER + fid[i][j] - 1));
+                    break;
+                }
+            }
+
         }
 
+    void draw() const
+    {
+        for(int i = 0; i < grid.height(); i++)for(int j = 0; j < grid.width(); j++)grid[i][j]->draw(grid_size);
+    }
     
 };
