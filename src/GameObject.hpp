@@ -14,6 +14,10 @@ typedef enum
     DOWN_GOAL,
     LEFT_GOAL,
     UP_GOAL,
+    RIGHT_TRANSBLOCK,
+    DOWN_TRANSBLOCK,
+    LEFT_TRANSBLOCK,
+    UP_TRANSBLOCK,
     GAME_OBJECT
 } GameObjectId;
 
@@ -234,40 +238,67 @@ public:
     }
 };
 
+class TransBlock : public GameObject
+{
+    // design
+    const double ROUND_PROPORTION = 0.1;
+    const double FRAME_PROPORTION = 0.04;
+    const Color FRAME_COLOR = Palette::Black;
+    const double EYE_SIZE_PROPORTION = 0.075;
+    const double EYE_HEIGHT_PROPORTION = 0.2;
+    const double EYE_MARIGN_PROPORTION = 0.5;
+    const Color EYE_COLOR = Palette::Black;
+public:
+    TransBlock(Vec2 _base_pos , Vector2D<int> _pos_in_grid, GameObjectId _id)
+        : GameObject(_base_pos, _pos_in_grid, _id)
+        {}
+
+    void draw(double grid_size) const
+    {
+        Vec2 draw_pos = Vec2(base_pos.x + grid_size * pos_in_grid.x, base_pos.y + grid_size * pos_in_grid.y);
+        Player player = (Player)(id - GameObjectId::RIGHT_TRANSBLOCK);
+        Direction direction = (Direction)(id - GameObjectId::RIGHT_TRANSBLOCK);
+
+        {
+            ColorF mul(1, 1, 1, 0.4);
+            const ScopedColorMul2D state(mul);
+            Rect(draw_pos.x, draw_pos.y, grid_size, grid_size).rounded(grid_size * ROUND_PROPORTION)
+                .draw(player2color(player))
+                .drawFrame(grid_size * FRAME_PROPORTION, 0, FRAME_COLOR);
+
+            Circle(draw_pos + Vec2(grid_size / 2, grid_size / 2) - grid_size * EYE_HEIGHT_PROPORTION * direction2vec2(direction) + 
+                        grid_size * EYE_MARIGN_PROPORTION / 2 * direction2vec2((Direction)((direction + 1) % 4)), 
+                        grid_size * EYE_SIZE_PROPORTION).draw(EYE_COLOR);
+            Circle(draw_pos + Vec2(grid_size / 2, grid_size / 2) - grid_size * EYE_HEIGHT_PROPORTION * direction2vec2(direction) + 
+                        grid_size * EYE_MARIGN_PROPORTION / 2 * direction2vec2((Direction)((direction + 3) % 4)), 
+                        grid_size * EYE_SIZE_PROPORTION).draw(EYE_COLOR);
+        }
+    }
+};
+
 GameObject* make_object(Vec2 base_pos, GameObjectId id, Vector2D<int> pos_in_grid)
 {
     switch (id)
     {
     case GameObjectId::EMPTY:
         return new Empty(base_pos, pos_in_grid);
-        break;
     case GameObjectId::BLOCK:
         return new Block(base_pos, pos_in_grid);
-        break;
     case GameObjectId::RIGHT_MONSTER:
-        return new Monster(base_pos, pos_in_grid, id);
-        break;
     case GameObjectId::DOWN_MONSTER:
-        return new Monster(base_pos, pos_in_grid, id);
-        break;
     case GameObjectId::LEFT_MONSTER:
-        return new Monster(base_pos, pos_in_grid, id);
-        break;
     case GameObjectId::UP_MONSTER:
         return new Monster(base_pos, pos_in_grid, id);
-        break;
     case GameObjectId::RIGHT_GOAL:
-        return new Goal(base_pos, pos_in_grid, id);
-        break;
     case GameObjectId::DOWN_GOAL:
-        return new Goal(base_pos, pos_in_grid, id);
-        break;
     case GameObjectId::LEFT_GOAL:
-        return new Goal(base_pos, pos_in_grid, id);
-        break;
     case GameObjectId::UP_GOAL:
         return new Goal(base_pos, pos_in_grid, id);
-        break;
+    case GameObjectId::RIGHT_TRANSBLOCK:
+    case GameObjectId::DOWN_TRANSBLOCK:
+    case GameObjectId::LEFT_TRANSBLOCK:
+    case GameObjectId::UP_TRANSBLOCK:
+        return new TransBlock(base_pos, pos_in_grid, id);
     default:
         return new GameObject(base_pos, pos_in_grid);
         break;

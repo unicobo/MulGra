@@ -32,11 +32,15 @@ class Stage
     bool _move(Vector2D<int> pos, Operation op)
     {
         Direction dir = op.direction;
+        Player pl = op.player;
         if(!in_range(pos)) return false;
         GameObjectId id = get_id(pos);
         if(id == GameObjectId::BLOCK) return false;
         if(id == GameObjectId::EMPTY) return true;
-        if(GameObjectId::RIGHT_MONSTER <= id && id <= GameObjectId::UP_MONSTER)
+        if(in(id, GameObjectId::RIGHT_TRANSBLOCK, GameObjectId::UP_TRANSBLOCK))
+        if((id - GameObjectId::RIGHT_TRANSBLOCK) != pl) return false;
+        else return true;
+        if (in(id, GameObjectId::RIGHT_MONSTER, GameObjectId::UP_MONSTER))
         {
             Vector2D<int> nxt_pos = pos + direction2vector2d(dir);
             if(_move(nxt_pos, op))
@@ -55,12 +59,13 @@ class Stage
     int _drop(Vector2D<int> pos)
     {
         GameObjectId current_id = get_id(pos);
+        int pid = current_id - GameObjectId::RIGHT_MONSTER;
         if(GameObjectId::RIGHT_MONSTER <= current_id && current_id <= GameObjectId::UP_MONSTER)
         {
             Direction dir = (Direction)(current_id - GameObjectId::RIGHT_MONSTER);
             Vector2D current_pos = pos + direction2vector2d(dir);
             int gap = 0;
-            while(in_range(current_pos) && get_id(current_pos) == GameObjectId::EMPTY)
+            while(in_range(current_pos) && (get_id(current_pos) == GameObjectId::EMPTY || pid == (get_id(current_pos) - GameObjectId::RIGHT_TRANSBLOCK)))
             {
                 current_pos += direction2vector2d(dir);
                 gap++;
