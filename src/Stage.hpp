@@ -108,7 +108,7 @@ public:
             grid_size = 0;
         }
 
-    void load_stage(int stage_id)
+    bool load_stage(int stage_id)
     {    
         String filename = U"../Resources/stages/stage{:0>2}"_fmt(stage_id);
 
@@ -116,7 +116,8 @@ public:
 
         if(!reader)
         {
-            throw Error(U"Failed to open `{}`"_fmt(filename));
+            // throw Error(U"Failed to open `{}`"_fmt(filename));
+            return true;
         }
 
         String line;
@@ -162,6 +163,7 @@ public:
         }
 
         state = State::READY;
+        return false;
     }
 
     GameObject** operator [](int n) { return obj[n]; }

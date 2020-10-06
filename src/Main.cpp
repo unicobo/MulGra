@@ -115,7 +115,11 @@ public:
         : IScene(init), pannel(600, 400, 300), stage(Vec2(20, 20), Vec2(400, 500)), mul(0.3, 0.3, 0.3)
     {
         int n_stage = getData().n_stage;
-        stage.load_stage(n_stage);
+        if(stage.load_stage(n_stage))
+        {
+            Print << U"Not implemented yet!";
+            stage.state = Stage::State::CLEAR;
+        }
     }
 
     void update() override
