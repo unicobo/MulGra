@@ -8,13 +8,17 @@ class Stage
     // Grid<int> impl; // TODO: kesu
     Grid<GameObject*> obj;
 
-    const Vec2 BASE_POS;
-    const Vec2 STAGE_SIZE;
+    const Vec2 OUTER_POS;
+    const Vec2 OUTER_SIZE;
+    Vec2 base_pos;
+    Vec2 stage_size;
     int col;
     int row;
     double grid_size;
     Array<Monster*> player_array[4];
-    Array<Goal*> goal_array[4]; 
+    Array<Goal*> goal_array[4];
+
+    const double marign_proportion = 0.05; 
 
     Direction drop_direction;
 
@@ -83,32 +87,18 @@ public:
     
     State state = State::READY;
 
-    Stage(Vec2 base_pos, Vec2 stage_size, Grid<GameObject*> _obj)
-        : obj(_obj)
-        , BASE_POS(base_pos)
-        , STAGE_SIZE(stage_size)
-        , col(_obj.width())
-        , row(_obj.height())
-        , grid_size(Min(stage_size.y/row, stage_size.x/col))
+    Stage(Vec2 _outer_pos, Vec2 _outer_size)
+        : OUTER_POS(_outer_pos)
+        , OUTER_SIZE(_outer_size)
         {
-            for(int i = 0; i < row; i++)for(int j = 0; j < col; j++)
-            {
-                GameObjectId current_id = get_id(Vector2D(j, i));
-                if(GameObjectId::RIGHT_MONSTER <= current_id && current_id <= GameObjectId::UP_MONSTER)
-                    player_array[current_id - GameObjectId::RIGHT_MONSTER] << (Monster*)obj[i][j];
-            }
-        }
-
-    Stage(Vec2 _base_pos, Vec2 _stage_size)
-        : BASE_POS(_base_pos)
-        , STAGE_SIZE(_stage_size)
-        {
+            base_pos = _outer_pos;
+            stage_size = _outer_size;
             row = 0;
             col = 0;
             grid_size = 0;
         }
 
-    void load_stage(int stage_id)
+    bool load_stage(int stage_id)
     {    
         String filename = U"../Resources/stages/stage{:0>2}"_fmt(stage_id);
 
@@ -116,7 +106,8 @@ public:
 
         if(!reader)
         {
-            throw Error(U"Failed to open `{}`"_fmt(filename));
+            // throw Error(U"Failed to open `{}`"_fmt(filename));
+            return true;
         }
 
         String line;
@@ -126,7 +117,10 @@ public:
         reader.readLine(line);
         row = Parse<int>(line);
 
-        grid_size = Min(STAGE_SIZE.y / row, STAGE_SIZE.x / col);
+        Vec2 max_stage_size = (1 - 2 * marign_proportion) * OUTER_SIZE;
+        grid_size = Min(max_stage_size.y / row, max_stage_size.x / col);
+        Vec2 center_pos = OUTER_POS + OUTER_SIZE / 2;
+        base_pos = Vec2(center_pos.x - grid_size * col / 2, center_pos.y - grid_size * row / 2);
 
         for(int i = 0; i < 4; i++)player_array[i].clear();
 
@@ -137,7 +131,7 @@ public:
             Array<String> ids = line.split(' ');
             for(int j = 0; j < col; j++)
             {
-                new_obj[i][j] = make_object(BASE_POS, (GameObjectId)Parse<int>(ids[j]), Vector2D<int>(j, i));
+                new_obj[i][j] = make_object(base_pos, (GameObjectId)Parse<int>(ids[j]), Vector2D<int>(j, i));
                 GameObjectId id = new_obj[i][j]->get_id();
                 if(GameObjectId::RIGHT_MONSTER <= id && id <= GameObjectId::UP_MONSTER)
                     player_array[id - GameObjectId::RIGHT_MONSTER] << (Monster*)new_obj[i][j];
@@ -158,10 +152,11 @@ public:
             Array<String> data = line.split(' ');
             GameObjectId id = (GameObjectId)Parse<int>(data[0]);
             Vector2D<int> pos_in_grid = Vector2D<int>(Parse<int>(data[1]), Parse<int>(data[2]));
-            goal_array[id - GameObjectId::RIGHT_GOAL] << (Goal*)make_object(BASE_POS, id, pos_in_grid);
+            goal_array[id - GameObjectId::RIGHT_GOAL] << (Goal*)make_object(base_pos, id, pos_in_grid);
         }
 
         state = State::READY;
+        return false;
     }
 
     GameObject** operator [](int n) { return obj[n]; }

@@ -112,9 +112,17 @@ private:
 
 public:
     Game(const InitData &init)
-        : IScene(init), pannel(600, 400, 300), stage(Vec2(20, 20), Vec2(400, 500)), mul(0.3, 0.3, 0.3)
+        : IScene(init)
+        , pannel(Vec2(0.6 * Scene::Width(), 0), Vec2(0.4 * Scene::Width(), Scene::Height()))
+        , stage(Vec2(0, 0), Vec2(0.6 * Scene::Width(), Scene::Height()))
+        , mul(0.3, 0.3, 0.3)
     {
-        stage.load_stage(1);
+        int n_stage = getData().n_stage;
+        if(stage.load_stage(n_stage))
+        {
+            Print << U"Not implemented yet!";
+            stage.state = Stage::State::CLEAR;
+        }
     }
 
     void update() override
