@@ -248,6 +248,10 @@ class TransBlock : public GameObject
     const double EYE_HEIGHT_PROPORTION = 0.2;
     const double EYE_MARIGN_PROPORTION = 0.5;
     const Color EYE_COLOR = Palette::Black;
+
+    // color
+    const double A = 122;
+
 public:
     TransBlock(Vec2 _base_pos , Vector2D<int> _pos_in_grid, GameObjectId _id)
         : GameObject(_base_pos, _pos_in_grid, _id)
@@ -258,21 +262,17 @@ public:
         Vec2 draw_pos = Vec2(base_pos.x + grid_size * pos_in_grid.x, base_pos.y + grid_size * pos_in_grid.y);
         Player player = (Player)(id - GameObjectId::RIGHT_TRANSBLOCK);
         Direction direction = (Direction)(id - GameObjectId::RIGHT_TRANSBLOCK);
+        
+        Rect(draw_pos.x, draw_pos.y, grid_size, grid_size).rounded(grid_size * ROUND_PROPORTION)
+            .draw(Color(player2color(player), A))
+            .drawFrame(grid_size * FRAME_PROPORTION, 0, Color(FRAME_COLOR, A));
 
-        {
-            ColorF mul(1, 1, 1, 0.4);
-            const ScopedColorMul2D state(mul);
-            Rect(draw_pos.x, draw_pos.y, grid_size, grid_size).rounded(grid_size * ROUND_PROPORTION)
-                .draw(player2color(player))
-                .drawFrame(grid_size * FRAME_PROPORTION, 0, FRAME_COLOR);
-
-            Circle(draw_pos + Vec2(grid_size / 2, grid_size / 2) - grid_size * EYE_HEIGHT_PROPORTION * direction2vec2(direction) + 
-                        grid_size * EYE_MARIGN_PROPORTION / 2 * direction2vec2((Direction)((direction + 1) % 4)), 
-                        grid_size * EYE_SIZE_PROPORTION).draw(EYE_COLOR);
-            Circle(draw_pos + Vec2(grid_size / 2, grid_size / 2) - grid_size * EYE_HEIGHT_PROPORTION * direction2vec2(direction) + 
-                        grid_size * EYE_MARIGN_PROPORTION / 2 * direction2vec2((Direction)((direction + 3) % 4)), 
-                        grid_size * EYE_SIZE_PROPORTION).draw(EYE_COLOR);
-        }
+        Circle(draw_pos + Vec2(grid_size / 2, grid_size / 2) - grid_size * EYE_HEIGHT_PROPORTION * direction2vec2(direction) + 
+                    grid_size * EYE_MARIGN_PROPORTION / 2 * direction2vec2((Direction)((direction + 1) % 4)), 
+                    grid_size * EYE_SIZE_PROPORTION).draw(Color(EYE_COLOR, A));
+        Circle(draw_pos + Vec2(grid_size / 2, grid_size / 2) - grid_size * EYE_HEIGHT_PROPORTION * direction2vec2(direction) + 
+                    grid_size * EYE_MARIGN_PROPORTION / 2 * direction2vec2((Direction)((direction + 3) % 4)), 
+                    grid_size * EYE_SIZE_PROPORTION).draw(Color(EYE_COLOR, A));
     }
 };
 
