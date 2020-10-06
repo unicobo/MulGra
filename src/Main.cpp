@@ -142,7 +142,10 @@ public:
         {
             // reload
             if(KeyR.pressed())
-                stage.load_stage(1);
+            {
+                int n_stage = getData().n_stage;
+                stage.load_stage(n_stage);
+            }
 
             // update and apply
             Optional<Operation> op = pannel.get_operation();
