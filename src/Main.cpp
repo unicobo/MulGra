@@ -117,7 +117,12 @@ public:
         , stage(Vec2(0, 0), Vec2(0.6 * Scene::Width(), Scene::Height()))
         , mul(0.3, 0.3, 0.3)
     {
-        stage.load_stage(1);
+        int n_stage = getData().n_stage;
+        if(stage.load_stage(n_stage))
+        {
+            Print << U"Not implemented yet!";
+            stage.state = Stage::State::CLEAR;
+        }
     }
 
     void update() override
