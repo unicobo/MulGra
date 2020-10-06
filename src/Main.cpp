@@ -3,6 +3,7 @@
 // #include "Monster.hpp"
 // #include "GameObject.hpp"
 #include "Stage.hpp"
+#include "Logo.hpp"
 
 const String team_name = U"unicobo";
 
@@ -24,9 +25,11 @@ using App = SceneManager<Scenes, GameData>;
 // タイトルシーン
 class Title : public App::Scene
 {
+    Logo logo;
 public:
     Title(const InitData &init)
         : IScene(init)
+        , logo(Vec2(0, 0), Vec2(Scene::Width(), Scene::Height()))
     {
     }
 
@@ -40,9 +43,10 @@ public:
 
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        Scene::SetBackground(ColorF(0.9, 0.9, 0.9));
 
-        FontAsset(U"TitleFont")(U"MulGra").drawAt(400, 100);
+        // FontAsset(U"TitleFont")(U"MulGra").drawAt(400, 100);
+        logo.draw();
 
         FontAsset(U"ScoreFont")(U"Made by: {}"_fmt(team_name)).draw(520, 540);
 
