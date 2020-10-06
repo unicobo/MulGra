@@ -53,3 +53,15 @@ struct Operation
         return player2string[player] + U" : " + direction2string[direction];
     }
 };
+
+bool in(int a, int b, int c)
+{
+    // a in b..c (including)
+    return b <= a && a <= c;
+}
+
+bool ine(int a, int b, int c)
+{
+    // a in b..c (excluding)
+    return b < a && a < c;
+}

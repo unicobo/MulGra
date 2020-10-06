@@ -12,6 +12,9 @@ private:
     static const int BUTTON_NUM = 8;
     ControlButton control_buttons[BUTTON_NUM];
 
+    // pannel
+    const double PANNEL_PROPORTION = 0.95;
+
     // button position
     const double BUTTON_DIST_PROPOTION = 0.35;
     const double BUTTON_MARGN_PROPOTION = 0.25;
@@ -30,13 +33,15 @@ private:
     const double dy[BUTTON_NUM] = {-BUTTON_MARGN_PROPOTION / 2, BUTTON_MARGN_PROPOTION / 2, BUTTON_DIST_PROPOTION, BUTTON_DIST_PROPOTION, BUTTON_MARGN_PROPOTION / 2, -BUTTON_MARGN_PROPOTION / 2, -BUTTON_DIST_PROPOTION, -BUTTON_DIST_PROPOTION};
 
 public:
-    ControlPannel(double _x, double _y, double _len) 
-        : pos(_x, _y), len(_len), rect(_x - len / 2, _y - len / 2, _len, _len)
+    ControlPannel(Vec2 _outer_pos, Vec2 _outer_size)
+        : pos(_outer_pos + _outer_size / 2)
+        , rect(pos.x - len / 2, pos.y - len / 2, len, len)
         {
+            len = Min(_outer_size.x, _outer_size.y) * PANNEL_PROPORTION;
             for(int i = 0; i < 8; i++)
             {
-                control_buttons[i].set_pos(Vec2(_x + _len * dx[i], _y + _len * dy[i]));
-                control_buttons[i].set_len(_len * BUTTON_SIZE_PROPOTION);
+                control_buttons[i].set_pos(Vec2(pos.x + len * dx[i], pos.y + len * dy[i]));
+                control_buttons[i].set_len(len * BUTTON_SIZE_PROPOTION);
                 control_buttons[i].set_player((Player)(i / 2));
                 control_buttons[i].set_direction(BUTTON_DIRECTIONS[i]);
             }
