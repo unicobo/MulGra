@@ -50,7 +50,7 @@ public:
 
         FontAsset(U"ScoreFont")(U"Made by: {}"_fmt(team_name)).draw(520, 540);
 
-        Circle(Cursor::Pos(), 50).draw(Palette::Orange);
+        // Circle(Cursor::Pos(), 50).draw(Palette::Orange);
     }
 };
 
@@ -71,9 +71,9 @@ public:
 
         if (game_select)
         {
-            double height = Scene::Height()/4;
+            double height = Scene::Height()/3;
             double width = Scene::Width()/4;
-            for (int i = 1; i < 4; i++)
+            for (int i = 1; i < 3; i++)
             {
                 for (int j = 1; j < 4; j++)
                 {

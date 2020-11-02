@@ -155,6 +155,11 @@ public:
             pos = _pre_pos_in_grid.lerp(_pos_in_grid, t);
             return pos != pre_pos;
         }
+        else
+        {
+            pos = pos_in_grid;
+            return false;
+        }
     }
 
     void pause() {move_stopwatch.pause(); drop_stopwatch.pause();}
